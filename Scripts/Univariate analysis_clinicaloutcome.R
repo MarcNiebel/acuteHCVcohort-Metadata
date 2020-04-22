@@ -18,11 +18,13 @@ Gender_ClinicalOutcome <- data %>% select(gender.factor,sc,record_id)
 Gender_ClinicalOutcome <- Gender_ClinicalOutcome %>% 
     filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
-#Allows for the ggplots to be drawn
 Gender_ClinicalOutcome$sc <- factor(Gender_ClinicalOutcome$sc)
-ggplot(Gender_ClinicalOutcome,aes(sc, fill=gender.factor))+geom_histogram(stat="count")
+pdf("Output/Gender_sc.pdf")
+plot1<- ggplot(Gender_ClinicalOutcome,aes(sc, fill=gender.factor))+geom_histogram(stat="count")
 #Alternative
-histogram(~sc | gender.factor, data=Gender_ClinicalOutcome)
+plot2 <- histogram(~sc | gender.factor, data=Gender_ClinicalOutcome)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 #Shows a contigency table
 table_gender <- table(Gender_ClinicalOutcome)
 #Statistics
@@ -503,7 +505,7 @@ stats_table <- data.frame(
                                     fisher_heroin_co,fisher_b_viral_load_binary_co,fisher_peakBil_binary_co,fisher_IDU_co,fisher_MSM_co,
                                     fisher_genotype_co,fisher_diabetic_co,fisher_alcohol_excess_co,wilcox_weight_co,fisher_immuno_co, 
                                     fisher_combined_il28b_co))
-pdf("stats_table_SC.pdf")
+pdf(file="Output/Assoications of variables with spontaneous clearance.pdf")
 grid.table(stats_table)
 dev.off()
 
