@@ -1,8 +1,7 @@
 #Created by Marc Niebel November 2019
 #Univariate analysis on acute HCV metadata for clinical outcomes
 #progression/spontaneous clearance
-#Logisitcal regression results are currently not produced in a table
-
+#Outputs are p-values only currently.
 #Libraries required
 library(dplyr)
 library(tidyr)
@@ -35,12 +34,12 @@ logit_gender_summ <- summ(logit_gender_clinicaloutcome,exp=TRUE,digits = 4)
 ###################################################
 Age_ClinicalOutcome <- data %>% select(age,sc,record_id)
 Age_ClinicalOutcome <- Age_ClinicalOutcome %>% 
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
-Age_ClinicalOutcome <- na.omit(Age_ClinicalOutcome)
 Age_ClinicalOutcome$sc <- factor(Age_ClinicalOutcome$sc)
 ggplot(Age_ClinicalOutcome,mapping=aes(x=sc,y=age))+geom_boxplot()+scale_y_continuous()
 ggplot(Age_ClinicalOutcome,aes(age))+geom_bar()
+#Statistics
 shapiro.test(Age_ClinicalOutcome$age)
 wilcox_age_co <- wilcox.test(age ~ sc,Age_ClinicalOutcome)$p.value
 wilcox_age_co <-round(wilcox_age_co,digits = 4)
