@@ -25,6 +25,7 @@ ggplot(Gender_ClinicalOutcome,aes(sc, fill=gender.factor))+geom_histogram(stat="
 histogram(~sc | gender.factor, data=Gender_ClinicalOutcome)
 #Shows a contigency table
 table_gender <- table(Gender_ClinicalOutcome)
+#Statistics
 fisher_go_co <-fisher.test(table_gender)$p.value
 fisher_go_co <-round(fisher_go_co,digits = 4)
 #Odds ratio analysis
@@ -49,21 +50,23 @@ logit_age_co <-summ(logit_age_clinicaloutcome,exp=TRUE,digits=4)
 ###################################################
 Ethnicity_ClinicalOutcome <- data %>% select(ethnic.factor, sc,record_id)
 Ethnicity_ClinicalOutcome <-Ethnicity_ClinicalOutcome %>% 
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 #Numbers are low so grouping into White british, any other white background, other ethnic background
-group_ethnicity_clinicaloutcome <- Ethnicity_ClinicalOutcome %>% mutate(Ethnic_grouping=case_when(ethnic.factor =="White British"~"White British",
-                                                                                                               ethnic.factor =="Any other White background" ~"Any other White background",
-                                                                                                               TRUE ~ "Other ethnic background"))
+group_ethnicity_clinicaloutcome <- Ethnicity_ClinicalOutcome %>% 
+    mutate(Ethnic_grouping=case_when(ethnic.factor =="White British"~"White British",
+                                     ethnic.factor =="Any other White background" ~"Any other White background",
+                                     TRUE ~ "Other ethnic background"))
 group_ethnicity_clinicaloutcome <- group_ethnicity_clinicaloutcome[,-1]
 group_ethnicity_clinicaloutcome$sc <-factor(group_ethnicity_clinicaloutcome$sc)
 ggplot(group_ethnicity_clinicaloutcome,aes(sc, fill=Ethnic_grouping))+geom_histogram(stat="count")
 #Alternative
 histogram(~sc | Ethnic_grouping, data=group_ethnicity_clinicaloutcome)
 table_group_ethnicity <- table(group_ethnicity_clinicaloutcome)
+#Statistics
 fisher_eth_group_co <- fisher.test(table_group_ethnicity)$p.value
 fisher_eth_group_co <- round(fisher_eth_group_co,digits = 4)
-#Odds ratio
+#Odds ratio analysis
 group_ethnicity_clinicaloutcome$Ethnic_grouping <-factor(group_ethnicity_clinicaloutcome$Ethnic_grouping)
 group_ethnicity_clinicaloutcome$Ethnic_grouping <-relevel(group_ethnicity_clinicaloutcome$Ethnic_grouping,ref="White British")
 logit_ethnicity_clinicaloutcome <-glm(sc ~ Ethnic_grouping, data=group_ethnicity_clinicaloutcome,family="binomial")
@@ -71,7 +74,7 @@ logit_ethnicty_co <- summ(logit_ethnicity_clinicaloutcome,exp=TRUE,digits=4)
 ###################################################
 HIV_ClinicalOutcome <- data %>% select(hiv.factor,sc,record_id)
 HIV_ClinicalOutcome <- HIV_ClinicalOutcome %>% 
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 clean_HIV_clinicaloutcome <- na.omit(HIV_ClinicalOutcome)
 clean_HIV_clinicaloutcome$sc <- factor(clean_HIV_clinicaloutcome$sc)
@@ -79,6 +82,7 @@ clean_HIV_clinicaloutcome$sc <- factor(clean_HIV_clinicaloutcome$sc)
 ggplot(clean_HIV_clinicaloutcome,aes(sc, fill=hiv.factor))+geom_histogram(stat="count")+ggtitle("HIV co-infection")+labs(fill="HIV")
 histogram(~sc | hiv.factor, data=clean_HIV_clinicaloutcome,col=c("red","seagreen"))
 table_HIV <- table(clean_HIV_clinicaloutcome)
+#Statistics
 fisher_hiv_co <- fisher.test(table_HIV)$p.value
 fisher_hiv_co <- round(fisher_hiv_co,digits = 4)
 #Odds ratio analysis
@@ -91,7 +95,7 @@ logit_HIV_co <- summ(logit_HIV_clinicaloutcome,exp=TRUE, digits=4)
 #HIV positive patients only
 CD4_ClinicalOutcome <- data %>% select(cd4_at_hcv_diagnosis, sc,hiv,record_id)
 CD4_ClinicalOutcome <- CD4_ClinicalOutcome %>% 
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 CD4_ClinicalOutcome_hiv_positive <- CD4_ClinicalOutcome %>%filter(hiv==1)
 CD4_ClinicalOutcome_hiv_positive <- CD4_ClinicalOutcome_hiv_positive[,-3]
