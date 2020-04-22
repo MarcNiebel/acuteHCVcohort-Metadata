@@ -493,7 +493,8 @@ wilcox_weight_co <- round(wilcox_weight_co,digits=4)
 logit_weight_clinicaloutcome <- glm(sc ~ weight, data=clean_weight_Clinical_Outcome,family="binomial")
 logit_weight_co <- summ(logit_weight_clinicaloutcome,exp=TRUE,digits = 4)
 ##################################################
-stats_table <- data.frame(Variable=c("Gender","Age","Ethnicity","HIV status","CD4(HIV +ve patients only)","ARVS(HIV+ve patients only)",
+stats_table <- data.frame(
+    Variable=c("Gender","Age","Ethnicity","HIV status","CD4(HIV +ve patients only)","ARVS(HIV+ve patients only)",
                                      "peak ALT(>1000)","cAb HBV","chronic HBV","Drug use","Cocaine use","Methamphetamine use","Heroin use", 
                                      "baseline viral load(>800,000 IU/ml)","peak Bilirubin(>20)","Risk factor:PWID", 
                                      "Risk factor:MSM","Genotype","Diabetes","Alcohol excess","Weight","Immunotherapy","IL28B(CC vs CT/TT)"),
