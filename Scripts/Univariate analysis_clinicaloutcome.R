@@ -20,7 +20,7 @@ Gender_ClinicalOutcome <- Gender_ClinicalOutcome %>%
     select(-record_id)
 Gender_ClinicalOutcome$sc <- factor(Gender_ClinicalOutcome$sc)
 pdf("Output/Gender_sc.pdf")
-plot1<- ggplot(Gender_ClinicalOutcome,aes(sc, fill=gender.factor))+geom_histogram(stat="count")
+plot1 <- ggplot(Gender_ClinicalOutcome,aes(sc, fill=gender.factor))+geom_histogram(stat="count")
 #Alternative
 plot2 <- histogram(~sc | gender.factor, data=Gender_ClinicalOutcome)
 grid.arrange(plot1,plot2,nrow=1)
@@ -33,7 +33,10 @@ fisher_go_co <-round(fisher_go_co,digits = 4)
 #Odds ratio analysis
 Gender_ClinicalOutcome$gender.factor <- relevel(Gender_ClinicalOutcome$gender.factor,ref="Male")
 logit_gender_clinicaloutcome <-glm(sc ~ gender.factor, data=Gender_ClinicalOutcome,family="binomial")
-logit_gender_summ <- summ(logit_gender_clinicaloutcome,exp=TRUE,digits = 4)
+logit_gender_co <- summ(logit_gender_clinicaloutcome,exp=TRUE,digits = 4)
+sink("Output/Gender_regression_summary.txt")
+print(logit_gender_co)
+sink()
 ###################################################
 Age_ClinicalOutcome <- data %>% select(age,sc,record_id)
 Age_ClinicalOutcome <- Age_ClinicalOutcome %>% 
