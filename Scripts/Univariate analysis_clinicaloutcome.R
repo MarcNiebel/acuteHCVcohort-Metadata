@@ -315,8 +315,11 @@ Heroin_use <- Heroin_use_ClinicalOutcome %>%
     mutate(use=case_when(drugs___20==1 ~ "Heroin use",TRUE ~"No use"))
 heroin_use_co <- Heroin_use[,-1]
 heroin_use_co$sc <- factor(heroin_use_co$sc)
-ggplot(heroin_use_co,aes(sc,fill=use))+geom_histogram(stat="count")
-histogram(~sc|use,data=heroin_use_co)
+pdf("Output/Heroin_use_sc.pdf")
+plot1 <- ggplot(heroin_use_co,aes(sc,fill=use))+geom_histogram(stat="count")
+plot2 <- histogram(~sc|use,data=heroin_use_co)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_heroin <- table(heroin_use_co)
 #Statistics
 fisher_heroin_co <- fisher.test(table_heroin)$p.value
@@ -326,6 +329,9 @@ heroin_use_co$use <-factor(heroin_use_co$use)
 heroin_use_co$use <-relevel(factor(heroin_use_co$use), ref="No use")
 logit_heroinuse_clinicaloutcome <- glm(sc~use, data=heroin_use_co,family="binomial")
 logit_heroin_co <- summ(logit_heroinuse_clinicaloutcome,exp=TRUE,digits = 4)
+sink("Output/heroin_use_regression_summary.txt")
+print(logit_heroin_co)
+sink()
 ###################################################
 b_viral_load_ClinicalOutcome <- data %>% select(vl1,sc,record_id)
 b_viral_load_ClinicalOutcome <- b_viral_load_ClinicalOutcome %>% 
@@ -337,9 +343,11 @@ b_viral_load_ClinicalOutcome_binary <- clean_viral_load_ClinicalOutcome %>%
     mutate(Viral_load=case_when(vl1 < 800000 ~ "low",TRUE ~ "high"))
 b_viral_load_ClinicalOutcome_binary <- b_viral_load_ClinicalOutcome_binary[,-1]
 b_viral_load_ClinicalOutcome_binary$sc <- factor(b_viral_load_ClinicalOutcome_binary$sc)
-ggplot(b_viral_load_ClinicalOutcome_binary,aes(sc, fill=Viral_load))+geom_histogram(stat="count")
-#Alternative
-histogram(~sc | Viral_load, data=b_viral_load_ClinicalOutcome_binary)
+pdf("Output/basline_viral_load_sc.pdf")
+plot1 <- ggplot(b_viral_load_ClinicalOutcome_binary,aes(sc, fill=Viral_load))+geom_histogram(stat="count")
+plot2 <- histogram(~sc | Viral_load, data=b_viral_load_ClinicalOutcome_binary)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_b_viral_load_binary <- table(b_viral_load_ClinicalOutcome_binary)
 #Statistics
 fisher_b_viral_load_binary_co <- fisher.test(table_b_viral_load_binary)$p.value
@@ -348,6 +356,9 @@ fisher_b_viral_load_binary_co <- round(fisher_b_viral_load_binary_co,digits = 4)
 b_viral_load_ClinicalOutcome_binary$Viral_load <- relevel(factor(b_viral_load_ClinicalOutcome_binary$Viral_load),ref="low")
 logit_baselineviralload_clinicaloutcome <- glm(sc ~ Viral_load, data=b_viral_load_ClinicalOutcome_binary,family="binomial")
 logit_b_viral_load_co <-summ(logit_baselineviralload_clinicaloutcome,exp=TRUE,digits=4)
+sink("Output/baseline_viral_load_regresssion_summary.txt")
+print(logit_b_viral_load_co)
+sink()
 ###################################################
 #HIV_positive patients only
 ARVS_ClinicalOutcome <- data %>% select(hiv_tx_at_hcv_diagnosis.factor, sc,hiv,record_id)
@@ -358,8 +369,11 @@ ARVS_ClinicalOutcome_hiv_pos <- ARVS_ClinicalOutcome %>% filter(hiv==1)
 ARVS_ClinicalOutcome_hiv_pos <- ARVS_ClinicalOutcome_hiv_pos[,-3]
 clean_ARVS_ClincalOutcome <- na.omit(ARVS_ClinicalOutcome_hiv_pos)
 clean_ARVS_ClincalOutcome$sc <-factor(clean_ARVS_ClincalOutcome$sc)
-ggplot(clean_ARVS_ClincalOutcome,aes(sc, fill=hiv_tx_at_hcv_diagnosis.factor))+geom_histogram(stat="count")
-histogram(~sc |hiv_tx_at_hcv_diagnosis.factor , data=clean_ARVS_ClincalOutcome)
+pdf("Output/ARVS_sc.pdf")
+plot1 <- ggplot(clean_ARVS_ClincalOutcome,aes(sc, fill=hiv_tx_at_hcv_diagnosis.factor))+geom_histogram(stat="count")
+plot2 <- histogram(~sc |hiv_tx_at_hcv_diagnosis.factor , data=clean_ARVS_ClincalOutcome)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_ARVS_co <- table(clean_ARVS_ClincalOutcome)
 #Statistics
 fisher_arvs_co <- fisher.test(table_ARVS_co)$p.value
@@ -368,6 +382,9 @@ fisher_arvs_co <- round(fisher_arvs_co,digits=4)
 clean_ARVS_ClincalOutcome$hiv_tx_at_hcv_diagnosis.factor <- relevel(clean_ARVS_ClincalOutcome$hiv_tx_at_hcv_diagnosis.factor,ref="No")
 logit_ARVS_clinicaloutcome <- glm(sc ~ hiv_tx_at_hcv_diagnosis.factor, data=clean_ARVS_ClincalOutcome,family="binomial")
 logit_ARVS_co <-summ(logit_ARVS_clinicaloutcome,exp=TRUE,digits=4)
+sink("Output/ARVS_sc.txt")
+print(logit_ARVS_co)
+sink()
 ###################################################
 immunotherapy_ClinicalOutcome <- data %>% select(immuno.factor,sc,record_id)
 immunotherapy_ClinicalOutcome <- immunotherapy_ClinicalOutcome %>% 
@@ -375,8 +392,11 @@ immunotherapy_ClinicalOutcome <- immunotherapy_ClinicalOutcome %>%
     select(-record_id)
 clean_immunotherapy_ClinicalOutcome <-na.omit(immunotherapy_ClinicalOutcome)
 clean_immunotherapy_ClinicalOutcome$sc <- factor(clean_immunotherapy_ClinicalOutcome$sc)
-ggplot(clean_immunotherapy_ClinicalOutcome,aes(sc, fill=immuno.factor))+geom_histogram(stat="count")
-histogram(~sc |immuno.factor, data=clean_immunotherapy_ClinicalOutcome)
+pdf("Output/immunotherapy_sc.pdf")
+plot1 <- ggplot(clean_immunotherapy_ClinicalOutcome,aes(sc, fill=immuno.factor))+geom_histogram(stat="count")
+plot2 <- histogram(~sc |immuno.factor, data=clean_immunotherapy_ClinicalOutcome)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_immuno <- table(clean_immunotherapy_ClinicalOutcome)
 #Statistic
 fisher_immuno_co <- fisher.test(table_immuno)$p.value
@@ -385,6 +405,9 @@ fisher_immuno_co <- round(fisher_immuno_co,digits=4)
 clean_immunotherapy_ClinicalOutcome$immuno.factor <- relevel(clean_immunotherapy_ClinicalOutcome$immuno.factor,ref="No")
 logit_immuno_clinicaloutcome <- glm(sc ~ immuno.factor, data=clean_immunotherapy_ClinicalOutcome,family="binomial")
 logit_immuno_co <- summ(logit_immuno_clinicaloutcome,exp=TRUE,digits=4)
+sink("Output/Immunotherapy_regression_summary.txt")
+print(logit_immuno_co)
+sink()
 ###################################################
 peakBil_ClinicalOutcome <- data %>% select(bil_peak_1,sc,record_id)
 peakBil_ClinicalOutcome <- peakBil_ClinicalOutcome %>% 
