@@ -96,9 +96,11 @@ HIV_ClinicalOutcome <- HIV_ClinicalOutcome %>%
 clean_HIV_clinicaloutcome <- na.omit(HIV_ClinicalOutcome)
 clean_HIV_clinicaloutcome$sc <- factor(clean_HIV_clinicaloutcome$sc)
 #Looking at distribution
-ggplot(clean_HIV_clinicaloutcome,aes(sc, fill=hiv.factor))+geom_histogram(stat="count")+
-    ggtitle("HIV co-infection")+labs(fill="HIV")
-histogram(~sc | hiv.factor, data=clean_HIV_clinicaloutcome,col=c("red","seagreen"))
+pdf("Output/HIV_co-infection_sc.pdf")
+plot1 <- ggplot(clean_HIV_clinicaloutcome,aes(sc, fill=hiv.factor))+geom_histogram(stat="count")
+plot2 <- histogram(~sc | hiv.factor, data=clean_HIV_clinicaloutcome,col=c("red","seagreen"))
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_HIV <- table(clean_HIV_clinicaloutcome)
 #Statistics
 fisher_hiv_co <- fisher.test(table_HIV)$p.value
@@ -110,6 +112,9 @@ clean_HIV_clinicaloutcome <- clean_HIV_clinicaloutcome[,c(2:3)]
 clean_HIV_clinicaloutcome$HIV_status <-factor(clean_HIV_clinicaloutcome$HIV_status)
 logit_HIV_clinicaloutcome <- glm(sc ~ HIV_status,data=clean_HIV_clinicaloutcome,family="binomial")
 logit_HIV_co <- summ(logit_HIV_clinicaloutcome,exp=TRUE, digits=4)
+sink("Output/HIV_co-infection_regression_summary.txt")
+print(logit_HIV_co)
+sink()
 ###################################################
 #HIV positive patients only
 CD4_ClinicalOutcome <- data %>% select(cd4_at_hcv_diagnosis, sc,hiv,record_id)
@@ -120,9 +125,11 @@ CD4_ClinicalOutcome_hiv_positive <- CD4_ClinicalOutcome %>%filter(hiv==1)
 CD4_ClinicalOutcome_hiv_positive <- CD4_ClinicalOutcome_hiv_positive[,-3]
 clean_CD4_ClinicalOutcome <- na.omit(CD4_ClinicalOutcome_hiv_positive)
 clean_CD4_ClinicalOutcome$sc <- factor(clean_CD4_ClinicalOutcome$sc)
-#Boxplot of the distribution based on CD4 counts
-ggplot(clean_CD4_ClinicalOutcome,mapping=aes(x=sc,y=cd4_at_hcv_diagnosis))+geom_boxplot()+scale_y_continuous()
-ggplot(clean_CD4_ClinicalOutcome)+geom_histogram(mapping=aes(x=cd4_at_hcv_diagnosis),binwidth = 100)
+pdf("Output/CD4_count_sc.pdf")
+plot1 <- ggplot(clean_CD4_ClinicalOutcome,mapping=aes(x=sc,y=cd4_at_hcv_diagnosis))+geom_boxplot()+scale_y_continuous()
+plot2 <- ggplot(clean_CD4_ClinicalOutcome)+geom_histogram(mapping=aes(x=cd4_at_hcv_diagnosis),binwidth = 100)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 #Statistics
 ggplot(clean_CD4_ClinicalOutcome,aes(sample=cd4_at_hcv_diagnosis))+stat_qq()+stat_qq_line()
 shapiro.test(clean_CD4_ClinicalOutcome$cd4_at_hcv_diagnosis)
@@ -131,6 +138,9 @@ wilcox_cd4_co <- round(wilcox_cd4_co,digits = 4)
 #Odds ratio analysis
 logit_CD4_clinicaloutcome <- glm(sc ~ cd4_at_hcv_diagnosis, data=clean_CD4_ClinicalOutcome,family="binomial")
 logit_cd4_co <- summ(logit_CD4_clinicaloutcome,exp=TRUE,digits = 4)
+sink("Output/CD4_regression_summary.txt")
+print(logit_cd4_co)
+sink()
 ###################################################
 peakALT_ClinicalOutcome <- data %>% select(alt_peak,sc,record_id)
 peakALT_ClinicalOutcome <- peakALT_ClinicalOutcome %>% 
@@ -142,9 +152,11 @@ clean_peakALT_ClinicalOutcome$sc <- factor(clean_peakALT_ClinicalOutcome$sc)
 peakALT_ClinicalOutcome_binary <- clean_peakALT_ClinicalOutcome %>% 
     mutate(Binary_peakALT=case_when(alt_peak >=1000 ~ ">1000",TRUE~"<1000"))
 peakALT_ClinicalOutcome_binary <- peakALT_ClinicalOutcome_binary[,-1]
-ggplot(peakALT_ClinicalOutcome_binary,aes(sc, fill=Binary_peakALT))+geom_histogram(stat="count")
-#Alternative
-histogram(~sc | Binary_peakALT, data=peakALT_ClinicalOutcome_binary)
+pdf("Output/peakALT_sc.pdf")
+plot1 <- ggplot(peakALT_ClinicalOutcome_binary,aes(sc, fill=Binary_peakALT))+geom_histogram(stat="count")
+plot2 <- histogram(~sc | Binary_peakALT, data=peakALT_ClinicalOutcome_binary)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_peakALT_binary <- table(peakALT_ClinicalOutcome_binary)
 #Statistics
 fisher_peakALT_binary_co <- fisher.test(table_peakALT_binary)$p.value
@@ -152,6 +164,9 @@ fisher_peakALT_binary_co <- round(fisher_peakALT_binary_co,digits = 4)
 #Odds ratio analysis
 logit_peakALT_clincaloutcome_binary <- glm(sc ~ Binary_peakALT,data=peakALT_ClinicalOutcome_binary,family="binomial")
 logit_peakALT_binary_co <-summ(logit_peakALT_clincaloutcome_binary,exp=TRUE,digits = 4)
+sink("Output/peakALT_regression_summary.txt")
+print(logit_peakALT_binary_co)
+sink()
 ###################################################
 cAb_HBV_ClinicalOutcome <- data %>% select(cab.factor,sc,record_id)
 cAb_HBV_ClinicalOutcome <- cAb_HBV_ClinicalOutcome %>% 
@@ -159,8 +174,11 @@ cAb_HBV_ClinicalOutcome <- cAb_HBV_ClinicalOutcome %>%
     select(-record_id)
 clean_cAb_HBV_ClinicalOutcome <- na.omit(cAb_HBV_ClinicalOutcome)
 clean_cAb_HBV_ClinicalOutcome$sc <-factor(clean_cAb_HBV_ClinicalOutcome$sc)
-ggplot(clean_cAb_HBV_ClinicalOutcome,aes(sc, fill=cab.factor))+geom_histogram(stat="count")
-histogram(~sc |cab.factor, data=clean_cAb_HBV_ClinicalOutcome)
+pdf("Output/cAb_HBV_sc.pdf")
+plot1 <- ggplot(clean_cAb_HBV_ClinicalOutcome,aes(sc, fill=cab.factor))+geom_histogram(stat="count")
+plot2 <- histogram(~sc |cab.factor, data=clean_cAb_HBV_ClinicalOutcome)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_cAb_HBV <- table(clean_cAb_HBV_ClinicalOutcome)
 #Statistics
 fisher_cAb_HBV_co <- fisher.test(table_cAb_HBV)$p.value
@@ -168,7 +186,10 @@ fisher_cAb_HBV_co <- round(fisher_cAb_HBV_co,digits = 4)
 #Odds ratio analysis
 clean_cAb_HBV_ClinicalOutcome$cab.factor <-relevel(clean_cAb_HBV_ClinicalOutcome$cab.factor,ref="Negative")
 logit_cAb_HBV_clinicaloutcome <- glm(sc ~ cab.factor, data=clean_cAb_HBV_ClinicalOutcome,family="binomial")
-logit_cAb_HBV <- summ(logit_cAb_HBV_clinicaloutcome,exp=TRUE,digits = 4)
+logit_cAb_HBV_co <- summ(logit_cAb_HBV_clinicaloutcome,exp=TRUE,digits = 4)
+sink("Output/cAb_HBV_regression_summary.txt")
+print(logit_cAb_HBV_co)
+sink()
 ###################################################
 chronic_HBV_ClinicalOutcome <- data %>% select(hbvsag_pcr.factor,sc,record_id)
 chronic_HBV_ClinicalOutcome <- chronic_HBV_ClinicalOutcome %>% 
@@ -176,8 +197,11 @@ chronic_HBV_ClinicalOutcome <- chronic_HBV_ClinicalOutcome %>%
     select(-record_id)
 clean_chronic_HBV_ClinicalOutcome <- na.omit(chronic_HBV_ClinicalOutcome)
 clean_chronic_HBV_ClinicalOutcome$sc <- factor(clean_chronic_HBV_ClinicalOutcome$sc)
-ggplot(clean_chronic_HBV_ClinicalOutcome,aes(sc, fill=hbvsag_pcr.factor))+geom_histogram(stat="count")
-histogram(~sc |hbvsag_pcr.factor, data=clean_chronic_HBV_ClinicalOutcome)
+pdf("Output/chronic_HBV_sc.pdf")
+plot1 <- ggplot(clean_chronic_HBV_ClinicalOutcome,aes(sc, fill=hbvsag_pcr.factor))+geom_histogram(stat="count")
+plot2 <- histogram(~sc |hbvsag_pcr.factor, data=clean_chronic_HBV_ClinicalOutcome)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_chronic_HBV <- table(clean_chronic_HBV_ClinicalOutcome)
 #No statistics due to 0 value cells
 ###################################################
@@ -201,8 +225,11 @@ all_Drug_use <- Drug_use_ClinicalOutcome %>%
 
 all_drug_use_co <- all_Drug_use[23:24]
 all_drug_use_co$sc <-factor(all_drug_use_co$sc)
-ggplot(all_drug_use_co,aes(sc, fill=Drug_use))+geom_histogram(stat="count")
-histogram(~sc |Drug_use, data=all_drug_use_co)
+pdf("Output/Drug_use_sc.pdf")
+plot1 <- ggplot(all_drug_use_co,aes(sc, fill=Drug_use))+geom_histogram(stat="count")
+plot2 <- histogram(~sc |Drug_use, data=all_drug_use_co)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_all_drug_use <- table(all_drug_use_co)
 #Statistics
 fisher_all_drug_use_co <- fisher.test(table_all_drug_use)$p.value
@@ -211,6 +238,9 @@ fisher_all_drug_use_co <-round(fisher_all_drug_use_co,digits = 4)
 all_drug_use_co$Drug_use <- relevel(factor(all_drug_use_co$Drug_use),ref="no use")
 logit_druguse_clinicaloutcome <- glm(sc ~Drug_use, data=all_drug_use_co,family="binomial")
 logit_drug_use_co <- summ(logit_druguse_clinicaloutcome,exp=TRUE,digits=4)
+sink("Output/Drug_use_regression_summary.txt")
+print(logit_drug_use_co)
+sink()
 ###################################################
 #Number of drugs taken by patients
 Drugs_used_record_id <- data %>% select(record_id,sc,drugs___20:drugs___19)
@@ -233,8 +263,11 @@ Cocaine_use <-Cocaine_use_ClinicalOutcome %>%
                          drugs___13==1 ~ "Cocaine use", TRUE ~"no use"))
 cocaine_use_co <- Cocaine_use[5:6]
 cocaine_use_co$sc <- factor(cocaine_use_co$sc)
-ggplot(cocaine_use_co,aes(sc, fill=use))+geom_histogram(stat="count")
-histogram(~sc|use, data=cocaine_use_co)
+pdf("Output/Cocaine_use_sc.pdf")
+plot1 <- ggplot(cocaine_use_co,aes(sc, fill=use))+geom_histogram(stat="count")
+plot2 <- histogram(~sc|use, data=cocaine_use_co)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 cocaine_table <-table(cocaine_use_co)
 #Statistics
 fisher_cocaine_use_co <- fisher.test(cocaine_table)$p.value
@@ -243,6 +276,9 @@ fisher_cocaine_use_co <- round(fisher_cocaine_use_co,digits=4)
 cocaine_use_co$use <- relevel(factor(cocaine_use_co$use), ref="no use")
 logit_cocaineuse_clinicaloutcome <- glm(sc ~ use, data=cocaine_use_co,family="binomial")
 logit_cocaine_co <-summ(logit_cocaineuse_clinicaloutcome,exp=TRUE,digits = 4)
+sink("Output/Cocaine_use_regression_summary.txt")
+print(logit_cocaine_co)
+sink()
 ###################################################
 Meth_Drug_use_ClinicalOutcome <- data %>% select(drugs___1:drugs___3,sc,record_id)
 Meth_Drug_use_ClinicalOutcome <- Meth_Drug_use_ClinicalOutcome %>% 
@@ -254,8 +290,11 @@ Meth_use <- Meth_Drug_use_ClinicalOutcome %>%
                          drugs___3 ==1 ~"Meth use",TRUE ~ "no use"))
 meth_use_co <- Meth_use[4:5]
 meth_use_co$sc <-factor(meth_use_co$sc)
-ggplot(meth_use_co,aes(sc, fill=use))+geom_histogram(stat="count")
-histogram(~sc |use, data=meth_use_co)
+pdf("Output/Meth_use_sc.pdf")
+plot1 <- ggplot(meth_use_co,aes(sc, fill=use))+geom_histogram(stat="count")
+plot2 <- histogram(~sc |use, data=meth_use_co)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 meth_table <- table(meth_use_co)
 #Statistics
 fisher_meth_co <- fisher.test(meth_table)$p.value
@@ -264,6 +303,9 @@ fisher_meth_co <- round(fisher_meth_co,digits =4)
 meth_use_co$use <- relevel(factor(meth_use_co$use),ref="no use")
 logit_meth_use_clinicaloutcome <- glm(sc ~ use, data=meth_use_co, family="binomial")
 logit_meth_use_co <-summ(logit_meth_use_clinicaloutcome,exp=TRUE,digits = 4)
+sink("Output/Meth_use_regression_summary.txt")
+print(logit_meth_use_co)
+sink()
 ###################################################
 Heroin_use_ClinicalOutcome <- data %>% select(drugs___20,sc,record_id)
 Heroin_use_ClinicalOutcome <- Heroin_use_ClinicalOutcome %>% 
