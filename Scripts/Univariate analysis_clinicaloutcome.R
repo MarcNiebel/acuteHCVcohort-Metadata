@@ -43,8 +43,11 @@ Age_ClinicalOutcome <- Age_ClinicalOutcome %>%
     filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 Age_ClinicalOutcome$sc <- factor(Age_ClinicalOutcome$sc)
-ggplot(Age_ClinicalOutcome,mapping=aes(x=sc,y=age))+geom_boxplot()+scale_y_continuous()
-ggplot(Age_ClinicalOutcome,aes(age))+geom_bar()
+pdf("Output/Age_sc.pdf")
+plot1 <- ggplot(Age_ClinicalOutcome,mapping=aes(x=sc,y=age))+geom_boxplot()+scale_y_continuous()
+plot2 <- ggplot(Age_ClinicalOutcome,aes(age))+geom_bar()
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 #Statistics
 shapiro.test(Age_ClinicalOutcome$age)
 wilcox_age_co <- wilcox.test(age ~ sc,Age_ClinicalOutcome)$p.value
@@ -52,6 +55,9 @@ wilcox_age_co <-round(wilcox_age_co,digits = 4)
 #Odds ratio analysis
 logit_age_clinicaloutcome <- glm(sc ~ age, data=Age_ClinicalOutcome,family="binomial")
 logit_age_co <-summ(logit_age_clinicaloutcome,exp=TRUE,digits=4)
+sink("Output/Age_regression_summary.txt")
+print(logit_age_co)
+sink()
 ###################################################
 Ethnicity_ClinicalOutcome <- data %>% select(ethnic.factor, sc,record_id)
 Ethnicity_ClinicalOutcome <-Ethnicity_ClinicalOutcome %>% 
@@ -64,9 +70,12 @@ group_ethnicity_clinicaloutcome <- Ethnicity_ClinicalOutcome %>%
                                      TRUE ~ "Other ethnic background"))
 group_ethnicity_clinicaloutcome <- group_ethnicity_clinicaloutcome[,-1]
 group_ethnicity_clinicaloutcome$sc <-factor(group_ethnicity_clinicaloutcome$sc)
-ggplot(group_ethnicity_clinicaloutcome,aes(sc, fill=Ethnic_grouping))+geom_histogram(stat="count")
+pdf("Output/Ethnicity_sc.pdf",paper="USr")
+plot1 <- ggplot(group_ethnicity_clinicaloutcome,aes(sc, fill=Ethnic_grouping))+geom_histogram(stat="count")
 #Alternative
-histogram(~sc | Ethnic_grouping, data=group_ethnicity_clinicaloutcome)
+plot2 <- histogram(~sc | Ethnic_grouping, data=group_ethnicity_clinicaloutcome)
+grid.arrange(plot1,plot2,ncol=1)
+dev.off()
 table_group_ethnicity <- table(group_ethnicity_clinicaloutcome)
 #Statistics
 fisher_eth_group_co <- fisher.test(table_group_ethnicity)$p.value
@@ -76,6 +85,9 @@ group_ethnicity_clinicaloutcome$Ethnic_grouping <-factor(group_ethnicity_clinica
 group_ethnicity_clinicaloutcome$Ethnic_grouping <-relevel(group_ethnicity_clinicaloutcome$Ethnic_grouping,ref="White British")
 logit_ethnicity_clinicaloutcome <-glm(sc ~ Ethnic_grouping, data=group_ethnicity_clinicaloutcome,family="binomial")
 logit_ethnicty_co <- summ(logit_ethnicity_clinicaloutcome,exp=TRUE,digits=4)
+sink("Output/Ethnicity_regression_summary.txt")
+print(logit_ethnicty_co)
+sink()
 ###################################################
 HIV_ClinicalOutcome <- data %>% select(hiv.factor,sc,record_id)
 HIV_ClinicalOutcome <- HIV_ClinicalOutcome %>% 
