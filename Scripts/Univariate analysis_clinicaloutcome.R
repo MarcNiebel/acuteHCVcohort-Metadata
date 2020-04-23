@@ -419,8 +419,11 @@ clean_peakBil_ClinicalOutcome$sc <- factor(clean_peakBil_ClinicalOutcome$sc)
 clean_peakBil_ClinicalOutcome_binary <- clean_peakBil_ClinicalOutcome %>% 
     mutate(peak_Bil_binary=case_when(bil_peak_1 >=20 ~">= 20",TRUE ~ "< 20"))
 clean_peakBil_ClinicalOutcome_binary <- clean_peakBil_ClinicalOutcome_binary[,-1]
-ggplot(clean_peakBil_ClinicalOutcome_binary,aes(sc,fill=peak_Bil_binary))+geom_histogram(stat="count")
-histogram(~sc|peak_Bil_binary,data=clean_peakBil_ClinicalOutcome_binary)
+pdf("Output/peakBilirubin_sc.pdf")
+plot1 <- ggplot(clean_peakBil_ClinicalOutcome_binary,aes(sc,fill=peak_Bil_binary))+geom_histogram(stat="count")
+plot2 <- histogram(~sc|peak_Bil_binary,data=clean_peakBil_ClinicalOutcome_binary)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_peakBil_binary_clinicaloutcome <-table(clean_peakBil_ClinicalOutcome_binary)
 #Statistics
 fisher_peakBil_binary_co <-fisher.test(table_peakBil_binary_clinicaloutcome)$p.value
@@ -428,6 +431,9 @@ fisher_peakBil_binary_co <- round(fisher_peakBil_binary_co,digits=4)
 #Odds ratio analysis
 logit_peakBil_clinicaloutcome_binary <- glm(sc ~ peak_Bil_binary, data=clean_peakBil_ClinicalOutcome_binary,family="binomial")
 logit_peakBil_co <-summ(logit_peakBil_clinicaloutcome_binary,exp=TRUE,digits=4)
+sink("Output/peakBilirubin_regression_summary.txt")
+print(logit_peakBil_co)
+sink()
 ###################################################
 IDU_ClinicalOutcome <- data %>% select(risk___1,sc,record_id)
 IDU_ClinicalOutcome <- IDU_ClinicalOutcome %>% 
@@ -438,8 +444,11 @@ IDU_risk <- clean_IDU_ClinicalOutcome %>%
     mutate(Risk=case_when(risk___1==1 ~"IDU",TRUE ~ "no IDU"))
 IDU_risk_co <- IDU_risk[2:3]
 IDU_risk_co$sc <- factor(IDU_risk_co$sc)
-ggplot(IDU_risk_co,aes(sc,fill=Risk))+geom_histogram(stat="count")
-histogram(~sc|Risk,data=IDU_risk_co)
+pdf("Output/IDU_risk_sc.pdf")
+plot1 <- ggplot(IDU_risk_co,aes(sc,fill=Risk))+geom_histogram(stat="count")
+plot2 <- histogram(~sc|Risk,data=IDU_risk_co)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_IDU <- table(IDU_risk_co)
 #Statistics
 fisher_IDU_co <-fisher.test(table_IDU)$p.value
@@ -448,6 +457,9 @@ fisher_IDU_co <- round(fisher_IDU_co,digits = 4)
 IDU_risk_co$Risk <- relevel(factor(IDU_risk_co$Risk),ref="no IDU")
 logit_IDU_clinicaloutcome <- glm(sc ~ Risk, data=IDU_risk_co,family="binomial")
 logit_IDU_co <-summ(logit_IDU_clinicaloutcome,exp=TRUE,digits = 4)
+sink("Output/IDU_risk_regression.txt")
+print(logit_IDU_co)
+sink()
 ###################################################
 MSM_ClincalOutcome <- data %>% select(risk___11,risk___10,risk___2,sc,record_id)
 MSM_ClincalOutcome <- MSM_ClincalOutcome %>% 
@@ -457,8 +469,11 @@ clean_MSM_ClinicalOutcome <- na.omit(MSM_ClincalOutcome)
 MSM_risk <- clean_MSM_ClinicalOutcome %>% mutate(Risk=case_when(risk___11 ==1|risk___10 ==1|risk___2==1 ~ "MSM",TRUE ~ "not MSM"))
 MSM_risk_co <-MSM_risk[4:5]
 MSM_risk_co$sc <- factor(MSM_risk_co$sc)
-ggplot(MSM_risk_co,aes(sc,fill=Risk))+geom_histogram(stat="count")
-histogram(~sc|Risk,data=MSM_risk_co)
+pdf("Output/MSM_sc.pdf")
+plot1 <- ggplot(MSM_risk_co,aes(sc,fill=Risk))+geom_histogram(stat="count")
+plot2 <- histogram(~sc|Risk,data=MSM_risk_co)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_MSM <- table(MSM_risk_co)
 #Statistics
 fisher_MSM_co <- fisher.test(table_MSM)$p.value
@@ -466,6 +481,9 @@ fisher_MSM_co <- round(fisher_MSM_co,digits = 4)
 #Odds ratio analysis
 logit_MSM_clinicaloutcome <- glm(sc ~ Risk, data=MSM_risk_co,family="binomial")
 logit_MSM_co <- summ(logit_MSM_clinicaloutcome,exp=TRUE,digits = 4)
+sink("Output/MSM_risk_regression_summary.txt")
+print(logit_MSM_co)
+sink()
 ###################################################
 #Selecting genotype and clinical outcome(excluding gt2 cause only 1 patient
 #ID 66 is documented as being dually infected.
@@ -479,9 +497,11 @@ patients_genotyped <-clean_Genotype_clinicalOutcome %>%
     gather(Genotype,id,clinical_genotype___1:clinical_genotype___4) %>%
     filter(id==1)
 patients_genotyped <- patients_genotyped[1:2]
-#Looking at the distribution
-ggplot(patients_genotyped,aes(sc, fill=Genotype))+geom_histogram(stat="count")
-histogram(~sc|Genotype, data=patients_genotyped)
+pdf("Output/infected_genotype_sc.pdf")
+plot1 <- ggplot(patients_genotyped,aes(sc, fill=Genotype))+geom_histogram(stat="count")
+plot2 <- histogram(~sc|Genotype, data=patients_genotyped)
+grid.arrange(plot1,plot2,ncol=1)
+dev.off()
 table_genotype <- table(patients_genotyped)
 #Statistics
 fisher_genotype_co <-fisher.test(table_genotype)$p.value
@@ -489,6 +509,9 @@ fisher_genotype_co <- round(fisher_genotype_co,digits=4)
 #Odds ratio analysis
 logit_genotype_clinical_outcome <-glm(sc ~ Genotype, data=patients_genotyped,family="binomial")
 logit_genotype_co <-summ(logit_genotype_clinical_outcome,exp=TRUE,digits = 4)
+sink("Output/Infected_genotype_regression_summary.txt")
+print(logit_genotype_co)
+sink()
 ###################################################
 diabetic_ClinicalOutcome <- data %>% select(comorbidities___2,sc,record_id)
 diabetic_ClinicalOutcome <- diabetic_ClinicalOutcome %>% 
