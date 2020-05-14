@@ -4,7 +4,6 @@
 #Libraries required
 library(dplyr)
 library(tidyr)
-library(reshape2)
 library(lattice)
 library(gridExtra)
 library(jtools)
@@ -543,7 +542,7 @@ clean_diabetic_Cirrhosis$Diabetes <- relevel(factor(clean_diabetic_Cirrhosis$Dia
 logit_diabetes_cirrhosis <- glm(cirrhosis ~ Diabetes, data=clean_diabetic_Cirrhosis,family="binomial")
 logit_diabetes_summ <- summ(logit_diabetes_cirrhosis,exp = TRUE,digits = 4)
 sink("Output/univariable_cirrhosis/Diabetes_regression_summary.txt")
-print(logit_diabetic_summ)
+print(logit_diabetes_summ)
 sink(file=NULL)
 ##################################################
 Alcohol_Excess_Cirrhosis <- data %>% select(alco_excess,cirrhosis,record_id)
@@ -603,8 +602,9 @@ ggplot(clean_il28b_Cirrhosis,aes(cirrhosis,fill=ifnl4_860.factor))+geom_histogra
 histogram(~cirrhosis|ifnl4_860.factor, data=clean_il28b_Cirrhosis)
 table_il28b_cirrhosis <- table(clean_il28b_Cirrhosis)
 fisher_il28b_cirrhosis <-fisher.test(table_il28b_cirrhosis)$p.value
+fisher_il28b_cirrhosis <- round(fisher_il28b_cirrhosis,digits = 4)
 #Odds ratio analysis
-logit_il28b_cirrhosis <- glm(cirrhosis ~ ifnl4_860.factor, data=,family="binomial")
+logit_il28b_cirrhosis <- glm(cirrhosis ~ ifnl4_860.factor, data=clean_il28b_Cirrhosis,family="binomial")
 logit_il28b_cirrhosis_summ <-summ(logit_il28b_cirrhosis,exp=TRUE)
 #Combine CT and TT due to low numbers of TT and not wanting to use CC as reference
 combined_CT_TT_levels_cirrhosis <- clean_il28b_Cirrhosis %>%
@@ -612,13 +612,14 @@ combined_CT_TT_levels_cirrhosis <- clean_il28b_Cirrhosis %>%
                                      ifnl4_860.factor == "TT" ~"non-CC",
                                      TRUE ~ "CC"))
 combined_CT_TT_levels_cirrhosis <- combined_CT_TT_levels_cirrhosis[,-1]
-pdf("Output/univariable_sc/IL28b_sc.pdf")
+pdf("Output/univariable_cirrhosis/IL28b_cirrhosis.pdf")
 plot1 <- ggplot(combined_CT_TT_levels_cirrhosis, aes(cirrhosis,fill=Genotype_binary))+geom_histogram(stat="count")
 plot2 <- histogram(~cirrhosis|Genotype_binary, data=combined_CT_TT_levels_cirrhosis)
 grid.arrange(plot1,plot2,nrow=1)
 dev.off()
 table_combined_il28b <-table(combined_CT_TT_levels_cirrhosis)
 fisher_combined_il28b_cirrhosis <- fisher.test(table_combined_il28b)$p.value
+fisher_combined_il28b_cirrhosis <- round(fisher_combined_il28b_cirrhosis,digits = 4)
 #Odds ratio analysis
 combined_CT_TT_levels_cirrhosis$Genotype_binary <- relevel(factor(combined_CT_TT_levels_cirrhosis$Genotype_binary),ref = "non-CC")
 logit_combined_il28b_cirrhosis <- glm(cirrhosis ~ Genotype_binary,data=combined_CT_TT_levels_cirrhosis,family = "binomial")
@@ -627,7 +628,8 @@ sink("Output/univariable_cirrhosis/IL28B_regression_summary.txt")
 print(logit_combined_il28b_summ)
 sink(file=NULL)
 ###################################################
-stats_table <- data.frame(Variable=c("Gender","Age","Ethnicity","HIV status","CD4(HIV +ve patients only)","ARVS(HIV+ve patients only)","peak ALT(>1000)",
+stats_table <- data.frame(
+    Variable=c("Gender","Age","Ethnicity","HIV status","CD4(HIV +ve patients only)","ARVS(HIV+ve patients only)","peak ALT(>1000)",
                                      "cAb HBV","chronic HBV","Drug use","Cocaine use","Methamphetamine use","Heroin use", "baseline viral load(>800,000 IU/ml)",
                                      "peak Bilirubin(>20)","Risk factor:PWID", "Risk factor:MSM","Genotype","Diabetes",
                                      "Alcohol excess","Weight","Immunotherapy","IL28B(CC vs CT/TT)"),
@@ -640,4 +642,3 @@ stats_table <- data.frame(Variable=c("Gender","Age","Ethnicity","HIV status","CD
 pdf(file="Output/univariable_cirrhosis/Association of variables with cirrhosis.pdf")
 grid.table(stats_table)
 dev.off()
-

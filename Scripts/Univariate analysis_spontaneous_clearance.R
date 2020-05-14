@@ -488,7 +488,7 @@ sink(file=NULL)
 #ID 66 is documented as being dually infected.
 Genotype_ClinicalOutcome <- data %>% select(clinical_genotype___1,clinical_genotype___3,clinical_genotype___4,sc,record_id)
 Genotype_ClinicalOutcome <- Genotype_ClinicalOutcome %>% 
-    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41)
 Genotype_ClinicalOutcome$sc <- factor(Genotype_ClinicalOutcome$sc)
 clean_Genotype_clinicalOutcome <- na.omit(Genotype_ClinicalOutcome)
 patients_genotyped <-clean_Genotype_clinicalOutcome %>%
