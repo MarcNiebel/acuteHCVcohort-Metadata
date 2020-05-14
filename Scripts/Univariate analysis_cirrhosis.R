@@ -304,51 +304,69 @@ sink(file=NULL)
 ###################################################
 b_viral_load_Cirrhosis <- data %>% select(vl1,cirrhosis,record_id)
 b_viral_load_Cirrhosis <- b_viral_load_Cirrhosis %>%
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 clean_viral_load_Cirrhosis <- na.omit(b_viral_load_Cirrhosis)
 #Using a binary predictor variable(<800,000 and >800,000)
 b_viral_load_Cirrhosis_binary <- clean_viral_load_Cirrhosis %>% mutate(Viral_load=case_when(vl1 < 800000 ~ "low",TRUE ~ "high"))
 b_viral_load_Cirrhosis_binary <- b_viral_load_Cirrhosis_binary[,-1]
 b_viral_load_Cirrhosis_binary$cirrhosis <- factor(b_viral_load_Cirrhosis_binary$cirrhosis)
-ggplot(b_viral_load_Cirrhosis_binary,aes(cirrhosis, fill=Viral_load))+geom_histogram(stat="count")
-histogram(~cirrhosis| Viral_load, data=b_viral_load_Cirrhosis_binary)
+pdf("Output/univariable_cirrhosis/basline_viral_load_cirrhosis.pdf")
+plot1 <- ggplot(b_viral_load_Cirrhosis_binary,aes(cirrhosis, fill=Viral_load))+geom_histogram(stat="count")
+plot2 <- histogram(~cirrhosis| Viral_load, data=b_viral_load_Cirrhosis_binary)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_b_viral_load_binary <- table(b_viral_load_Cirrhosis_binary)
+#Statistics
 fisher_b_viral_load_binary_cirrhosis <- fisher.test(table_b_viral_load_binary)$p.value
 fisher_b_viral_load_binary_cirrhosis <- round(fisher_b_viral_load_binary_cirrhosis,digits = 4)
 #Odds ratio analysis
 b_viral_load_Cirrhosis_binary$Viral_load <- relevel(factor(b_viral_load_Cirrhosis_binary$Viral_load),ref="low")
 logit_baselineviralload_cirrhosis <- glm(cirrhosis ~ Viral_load, data=b_viral_load_Cirrhosis_binary,family="binomial")
 logit_b_viral_load_summ <- summ(logit_baselineviralload_cirrhosis,exp=TRUE,digits = 4)
+sink("Output/univariable_sc/baseline_viral_load_regresssion_summary.txt")
+print(logit_b_viral_load_summ)
+sink(file=NULL)
 ###################################################
-#HIV patients only!!
+#HIV positive patients only
 ARVS_Cirrhosis <- data %>% select(hiv_tx_at_hcv_diagnosis.factor, cirrhosis,record_id,hiv)
 ARVS_Cirrhosis <- ARVS_Cirrhosis %>%
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 ARVS_Cirrhosis_hiv_pos <-ARVS_Cirrhosis %>% filter(hiv==1)
 ARVS_Cirrhosis_hiv_pos <- ARVS_Cirrhosis_hiv_pos[,-3]
 clean_ARVS_Cirrhosis <- na.omit(ARVS_Cirrhosis_hiv_pos)
 clean_ARVS_Cirrhosis$cirrhosis <-factor(clean_ARVS_Cirrhosis$cirrhosis)
-ggplot(clean_ARVS_Cirrhosis,aes(cirrhosis, fill=hiv_tx_at_hcv_diagnosis.factor))+geom_histogram(stat="count")
-histogram(~cirrhosis |hiv_tx_at_hcv_diagnosis.factor , data=clean_ARVS_Cirrhosis)
+pdf("Output/univariable_cirrhosis/ARVS_cirrhosis.pdf")
+plot1 <- ggplot(clean_ARVS_Cirrhosis,aes(cirrhosis, fill=hiv_tx_at_hcv_diagnosis.factor))+geom_histogram(stat="count")
+plot2 <- histogram(~cirrhosis |hiv_tx_at_hcv_diagnosis.factor , data=clean_ARVS_Cirrhosis)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_ARVS_cirrhosis <- table (clean_ARVS_Cirrhosis)
+#Statistics
 fisher_arvs_cirrhosis <- fisher.test(table_ARVS_cirrhosis)$p.value
 fisher_arvs_cirrhosis <- round(fisher_arvs_cirrhosis,digits = 4)
 #Odds ratio analysis
 clean_ARVS_Cirrhosis$hiv_tx_at_hcv_diagnosis.factor <- relevel(clean_ARVS_Cirrhosis$hiv_tx_at_hcv_diagnosis.factor,ref = "No")
 logit_ARVS_cirrhosis <- glm(cirrhosis ~hiv_tx_at_hcv_diagnosis.factor , data=clean_ARVS_Cirrhosis,family="binomial")
 logit_ARVS_summ <- summ(logit_ARVS_cirrhosis,exp=TRUE,digits = 4)
+sink("Output/univariable_cirrhosis/ARVS_regression_summary.txt")
+print(logit_ARVS_summ)
+sink(file=NULL)
 ###################################################
 immunotherapy_Cirrhosis <- data %>% select(immuno.factor,cirrhosis,record_id)
 immunotherapy_Cirrhosis <- immunotherapy_Cirrhosis %>%
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 clean_immunotherapy_Cirrhosis <-na.omit(immunotherapy_Cirrhosis)
 clean_immunotherapy_Cirrhosis$cirrhosis <- factor(clean_immunotherapy_Cirrhosis$cirrhosis)
-ggplot(clean_immunotherapy_Cirrhosis,aes(cirrhosis, fill=immuno.factor))+geom_histogram(stat="count")
-histogram(~cirrhosis |immuno.factor, data=clean_immunotherapy_Cirrhosis)
+pdf("Output/univariable_cirrhosis/immunotherapy_cirrhosis.pdf")
+plot1 <- ggplot(clean_immunotherapy_Cirrhosis,aes(cirrhosis, fill=immuno.factor))+geom_histogram(stat="count")
+plot2 <- histogram(~cirrhosis |immuno.factor, data=clean_immunotherapy_Cirrhosis)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_immuno_cirrhosis <- table(clean_immunotherapy_Cirrhosis)
+#Statistics
 fisher_immuno_cirrhosis <- fisher.test(table_immuno_cirrhosis)$p.value
 fisher_immuno_cirrhosis <- round(fisher_immuno_cirrhosis,digits = 4)
 #Odds ratio analysis
@@ -356,42 +374,59 @@ clean_immunotherapy_Cirrhosis$immuno.factor <- relevel(clean_immunotherapy_Cirrh
 logit_immuno_cirrhosis <- glm(cirrhosis ~ immuno.factor, data=clean_immunotherapy_Cirrhosis,family="binomial")
 logit_immuno_summ <- summ(logit_immuno_cirrhosis,exp=TRUE,digits = 4)
 #Caution only 11 patients have immunotherapy!!
+sink("Output/univariable_cirrhosis/Immunotherapy_regression_summary.txt")
+print(logit_immuno_summ)
+sink(file=NULL)
 ###################################################
 peakBil_Cirrhosis <- data %>% select(bil_peak_1,cirrhosis,record_id)
 peakBil_Cirrhosis <- peakBil_Cirrhosis %>%
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 clean_peakBil_Cirrhosis <- na.omit(peakBil_Cirrhosis)
 clean_peakBil_Cirrhosis$cirrhosis <- factor(clean_peakBil_Cirrhosis$cirrhosis)
 #Binary predictor outcome(>=20 and <20)
 clean_peakBil_Cirrhosis_binary <- clean_peakBil_Cirrhosis %>% mutate(peak_Bil_binary=case_when(bil_peak_1 >=20 ~">= 20",TRUE ~ "< 20"))
 clean_peakBil_Cirrhosis_binary <- clean_peakBil_Cirrhosis_binary[,-1]
-ggplot(clean_peakBil_Cirrhosis_binary,aes(cirrhosis,fill=peak_Bil_binary))+geom_histogram(stat="count")
-histogram(~cirrhosis|peak_Bil_binary,data=clean_peakBil_Cirrhosis_binary)
+pdf("Output/univariable_cirrhosis/peakBilirubin_cirrhosis.pdf")
+plot1 <- ggplot(clean_peakBil_Cirrhosis_binary,aes(cirrhosis,fill=peak_Bil_binary))+geom_histogram(stat="count")
+plot2 <- histogram(~cirrhosis|peak_Bil_binary,data=clean_peakBil_Cirrhosis_binary)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_peakBil_binary_Cirrhosis <-table(clean_peakBil_Cirrhosis_binary)
+#Statistics
 fisher_peakBil_binary_cirrhosis <-fisher.test(table_peakBil_binary_Cirrhosis)$p.value
 fisher_peakBil_binary_cirrhosis <- round(fisher_peakBil_binary_cirrhosis,digits = 4)
 #Odds ratio analysis
 logit_peakBil_cirrhosis <- glm(cirrhosis ~ peak_Bil_binary, data=clean_peakBil_Cirrhosis_binary,family="binomial")
 logit_peakBil_summ <- summ(logit_peakBil_cirrhosis,exp=TRUE,digits = 4)
+sink("Output/univariable_cirrhosis/peakBilirubin_regression_summary.txt")
+print(logit_peakBil_summ)
+sink(file=NULL)
 ###################################################
 IDU_Cirrhosis <- data %>% select(risk___1,cirrhosis,record_id)
 IDU_Cirrhosis <- IDU_Cirrhosis %>%
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 clean_IDU_Cirrhosis <-na.omit(IDU_Cirrhosis)
 clean_IDU_Cirrhosis$cirrhosis <- factor(clean_IDU_Cirrhosis$cirrhosis)
 IDU_risk_cirrhosis <- clean_IDU_Cirrhosis %>% mutate(Risk=case_when(risk___1==1 ~"IDU",TRUE ~ "no IDU"))
 IDU_risk_cir <- IDU_risk_cirrhosis[2:3]
-ggplot(IDU_risk_cir,aes(cirrhosis,fill=Risk))+geom_histogram(stat="count")
-histogram(~cirrhosis|Risk,data=IDU_risk_cir)
+pdf("Output/univariable_cirrhosis/IDU_risk_cirrhosis.pdf")
+plot1 <- ggplot(IDU_risk_cir,aes(cirrhosis,fill=Risk))+geom_histogram(stat="count")
+plot2 <- histogram(~cirrhosis|Risk,data=IDU_risk_cir)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_IDU_cir <- table(IDU_risk_cir)
+#Statistics
 fisher_IDU_cirrhosis <-fisher.test(table_IDU_cir)$p.value
 fisher_IDU_cirrhosis <- round(fisher_IDU_cirrhosis,digits = 4)
 #Odds ratio analysis
 IDU_risk_cir$Risk <-relevel(factor(IDU_risk_cir$Risk),ref="no IDU")
 logit_IDU_cirrhosis <- glm(cirrhosis ~ Risk, data=IDU_risk_cir,family="binomial")
 logit_IDU_summ <- summ(logit_IDU_cirrhosis,exp=TRUE,digits = 4)
+sink("Output/univariable_cirrhosis/IDU_risk_regression.txt")
+print(logit_IDU_summ)
+sink(file=NULL)
 ###################################################
 MSM_Cirrhosis <- data %>% select(risk___11,risk___10,risk___2,cirrhosis,record_id)
 MSM_Cirrhosis <- MSM_Cirrhosis %>%

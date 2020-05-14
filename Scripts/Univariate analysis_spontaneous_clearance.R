@@ -381,7 +381,7 @@ fisher_arvs_co <- round(fisher_arvs_co,digits=4)
 clean_ARVS_ClincalOutcome$hiv_tx_at_hcv_diagnosis.factor <- relevel(clean_ARVS_ClincalOutcome$hiv_tx_at_hcv_diagnosis.factor,ref="No")
 logit_ARVS_clinicaloutcome <- glm(sc ~ hiv_tx_at_hcv_diagnosis.factor, data=clean_ARVS_ClincalOutcome,family="binomial")
 logit_ARVS_co <-summ(logit_ARVS_clinicaloutcome,exp=TRUE,digits=4)
-sink("Output/univariable_sc/ARVS_sc.txt")
+sink("Output/univariable_sc/ARVS_regression_summary.txt")
 print(logit_ARVS_co)
 sink(file=NULL)
 ###################################################
@@ -436,7 +436,7 @@ sink(file=NULL)
 ###################################################
 IDU_ClinicalOutcome <- data %>% select(risk___1,sc,record_id)
 IDU_ClinicalOutcome <- IDU_ClinicalOutcome %>% 
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 clean_IDU_ClinicalOutcome <-na.omit(IDU_ClinicalOutcome)
 IDU_risk <- clean_IDU_ClinicalOutcome %>% 
