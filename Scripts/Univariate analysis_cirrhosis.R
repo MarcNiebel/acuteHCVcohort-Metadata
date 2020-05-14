@@ -628,8 +628,8 @@ print(logit_combined_il28b_summ)
 sink(file=NULL)
 ###################################################
 #IL28b missing
-stats_table <- data.frame(Variable=c("Gender","Age","Ethnicity","HIV status","CD4(HIV +ve patients only)","ARVS(HIV+ve patients only)","peak ALT(>1000)","cAb HBV","chronic HBV",
-                                     "Drug use","Cocaine use","Methamphetamine use","Heroin use", "baseline viral load(>800,000 IU/ml)",
+stats_table <- data.frame(Variable=c("Gender","Age","Ethnicity","HIV status","CD4(HIV +ve patients only)","ARVS(HIV+ve patients only)","peak ALT(>1000)",
+                                     "cAb HBV","chronic HBV","Drug use","Cocaine use","Methamphetamine use","Heroin use", "baseline viral load(>800,000 IU/ml)",
                                      "peak Bilirubin(>20)","Risk factor:PWID", "Risk factor:MSM","Genotype","Diabetes",
                                      "Alcohol excess","Weight","Immunotherapy","IL28B(CC vs CT/TT)"),
                           p_value=c(fisher_g_cirrhosis,wilcox_age_cirrhosis,fisher_group_eth_cirrhosis,fisher_HIV_cirrhosis,wilcox_cd4_cirrhosis,
