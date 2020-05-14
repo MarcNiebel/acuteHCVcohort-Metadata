@@ -462,7 +462,7 @@ sink(file=NULL)
 ###################################################
 MSM_ClincalOutcome <- data %>% select(risk___11,risk___10,risk___2,sc,record_id)
 MSM_ClincalOutcome <- MSM_ClincalOutcome %>% 
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 clean_MSM_ClinicalOutcome <- na.omit(MSM_ClincalOutcome)
 MSM_risk <- clean_MSM_ClinicalOutcome %>% mutate(Risk=case_when(risk___11 ==1|risk___10 ==1|risk___2==1 ~ "MSM",TRUE ~ "not MSM"))
@@ -489,13 +489,15 @@ sink(file=NULL)
 Genotype_ClinicalOutcome <- data %>% select(clinical_genotype___1,clinical_genotype___3,clinical_genotype___4,sc,record_id)
 Genotype_ClinicalOutcome <- Genotype_ClinicalOutcome %>% 
     filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
-    select(-record_id)
 Genotype_ClinicalOutcome$sc <- factor(Genotype_ClinicalOutcome$sc)
 clean_Genotype_clinicalOutcome <- na.omit(Genotype_ClinicalOutcome)
 patients_genotyped <-clean_Genotype_clinicalOutcome %>%
     gather(Genotype,id,clinical_genotype___1:clinical_genotype___4) %>%
     filter(id==1)
-patients_genotyped <- patients_genotyped[1:2]
+#Removed ID 66 dual infection cause no evidence in sequencing data
+patients_genotyped <- patients_genotyped %>%
+    filter(record_id != 66 | Genotype !="clinical_genotype___4")
+patients_genotyped <- patients_genotyped[1:3]
 pdf("Output/univariable_sc/infected_genotype_sc.pdf")
 plot1 <- ggplot(patients_genotyped,aes(sc, fill=Genotype))+geom_histogram(stat="count")
 plot2 <- histogram(~sc|Genotype, data=patients_genotyped)
@@ -517,7 +519,8 @@ diabetic_ClinicalOutcome <- diabetic_ClinicalOutcome %>%
     filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 clean_diabetic_ClinicalOutcome <-na.omit(diabetic_ClinicalOutcome)
-clean_diabetic_ClinicalOutcome <- clean_diabetic_ClinicalOutcome %>% mutate(Diabetes=case_when(comorbidities___2 == 0 ~ "No diabetes",TRUE~"diabetes"))
+clean_diabetic_ClinicalOutcome <- clean_diabetic_ClinicalOutcome %>% 
+    mutate(Diabetes=case_when(comorbidities___2 == 0 ~ "No diabetes",TRUE~"diabetes"))
 clean_diabetic_ClinicalOutcome <- clean_diabetic_ClinicalOutcome[,-1]
 clean_diabetic_ClinicalOutcome$sc <- factor(clean_diabetic_ClinicalOutcome$sc)
 pdf("Output/univariable_sc/Diabetes_sc.pdf")
@@ -543,11 +546,8 @@ filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
    select(-record_id)
 clean_il28b_ClinicalOutcome <-na.omit(il28b_ClinicalOutcome)
 clean_il28b_ClinicalOutcome$sc <- factor(clean_il28b_ClinicalOutcome$sc)
-pdf("Output/univariable_sc/IL28b_sc.pdf")
-plot1 <- ggplot(clean_il28b_ClinicalOutcome,aes(sc,fill=ifnl4_860.factor))+geom_histogram(stat="count")
-plot2 <- histogram(~sc|ifnl4_860.factor, data=clean_il28b_ClinicalOutcome)
-grid.arrange(plot1,plot2,nrow=1)
-dev.off()
+ggplot(clean_il28b_ClinicalOutcome,aes(sc,fill=ifnl4_860.factor))+geom_histogram(stat="count")
+histogram(~sc|ifnl4_860.factor, data=clean_il28b_ClinicalOutcome)
 table_il28b <- table(clean_il28b_ClinicalOutcome)
 #Statistic
 fisher_il28b_co <-fisher.test(table_il28b)$p.value
@@ -561,6 +561,11 @@ combined_CT_TT_levels <- clean_il28b_ClinicalOutcome %>%
                                      ifnl4_860.factor == "TT" ~"non-CC",
                                      TRUE ~ "CC"))
 combined_CT_TT_levels <- combined_CT_TT_levels[,-1]
+pdf("Output/univariable_sc/IL28b_sc.pdf")
+plot1 <- ggplot(combined_CT_TT_levels,aes(sc,fill=Genotype_binary))+geom_histogram(stat="count")
+plot2 <- histogram(~sc|Genotype_binary,data=combined_CT_TT_levels)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_combined_ifnl4_860 <-table(combined_CT_TT_levels)
 #Statistics
 fisher_combined_il28b_co <- fisher.test(table_combined_ifnl4_860)$p.value

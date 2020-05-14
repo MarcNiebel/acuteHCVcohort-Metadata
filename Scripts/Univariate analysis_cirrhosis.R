@@ -430,149 +430,202 @@ sink(file=NULL)
 ###################################################
 MSM_Cirrhosis <- data %>% select(risk___11,risk___10,risk___2,cirrhosis,record_id)
 MSM_Cirrhosis <- MSM_Cirrhosis %>%
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 clean_MSM_Cirrhosis <- na.omit(MSM_Cirrhosis)
 MSM_risk_cirrhosis <- clean_MSM_Cirrhosis %>% mutate(Risk=case_when(risk___11 ==1|risk___10 ==1|risk___2==1 ~ "MSM",TRUE ~ "not MSM"))
 MSM_risk_cir <-MSM_risk_cirrhosis[4:5]
 MSM_risk_cir$cirrhosis <-factor(MSM_risk_cir$cirrhosis)
-ggplot(MSM_risk_cir,aes(cirrhosis,fill=Risk))+geom_histogram(stat="count")
-histogram(~cirrhosis|Risk,data=MSM_risk_cir)
+pdf("Output/univariable_cirrhosis/MSM_cirrhosis.pdf")
+plot1 <- ggplot(MSM_risk_cir,aes(cirrhosis,fill=Risk))+geom_histogram(stat="count")
+plot2 <- histogram(~cirrhosis|Risk,data=MSM_risk_cir)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_MSM_cir <- table(MSM_risk_cir)
+#Statistics
 fisher_MSM_cir <- fisher.test(table_MSM_cir)$p.value
 fisher_MSM_cir <- round(fisher_MSM_cir,digits = 4)
 #Odds ratio analysis
 MSM_risk_cir$Risk <- relevel(factor(MSM_risk_cir$Risk),ref="not MSM")
 logit_MSM_cirrhosis <- glm(cirrhosis ~ Risk, data=MSM_risk_cir,family="binomial")
 logit_MSM_risk_summ <-summ(logit_MSM_cirrhosis,exp=TRUE, digits = 4)
+sink("Output/univariable_cirrhosis/MSM_risk_regression_summary.txt")
+print(logit_MSM_risk_summ)
+sink(file=NULL)
 ###################################################
 Ethnicity_Cirrhosis <- data %>% select(ethnic.factor,cirrhosis,record_id)
 Ethnicity_Cirrhosis <- Ethnicity_Cirrhosis %>%
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 clean_ethnicity_cirrhosis <- na.omit(Ethnicity_Cirrhosis)
-#Grouped
-group_ethnicity_cirrhosis <-clean_ethnicity_cirrhosis %>% mutate(Ethnic_grouping=case_when(ethnic.factor =="White British"~"White British",
-                                                                                                 ethnic.factor =="Any other White background" ~"Any other White background",
-                                                                                                 TRUE ~ "Other ethnic background"))
+group_ethnicity_cirrhosis <-clean_ethnicity_cirrhosis %>% 
+    mutate(Ethnic_grouping=case_when(ethnic.factor =="White British"~"White British",
+                                     ethnic.factor =="Any other White background" ~"Any other White background",
+                                     TRUE ~ "Other ethnic background"))
 group_ethnicity_cirrhosis <- group_ethnicity_cirrhosis[,-1]
 group_ethnicity_cirrhosis$cirrhosis <- factor(group_ethnicity_cirrhosis$cirrhosis)
 ggplot(group_ethnicity_cirrhosis,aes(cirrhosis, fill=Ethnic_grouping))+geom_histogram(stat="count")
-#Alternative
-histogram(~cirrhosis | Ethnic_grouping, data=group_ethnicity_cirrhosis)
+histogram(~cirrhosis | Ethnic_grouping, data=group_ethnicity_cirrhosis) 
 #contigency table
 table_group_ethnicity_cirrhosis <- table(group_ethnicity_cirrhosis)
 #Combining further cause 0s in other ethnic background 
 group_ethnicity_cirrhosis_combined_ethnicity <- group_ethnicity_cirrhosis %>%
-    mutate(New_ethnic_grouping=case_when(Ethnic_grouping == "Other ethnic background"|Ethnic_grouping =="Any other White background" ~"Other",
-                                        TRUE ~ "White British"))
+    mutate(New_ethnic_grouping=case_when(Ethnic_grouping == "Other ethnic background"|
+                                         Ethnic_grouping =="Any other White background" ~"Other",
+                                         TRUE ~ "White British"))
 group_ethnicity_cirrhosis_combined_ethnicity <- group_ethnicity_cirrhosis_combined_ethnicity[,-2]
-ggplot(group_ethnicity_cirrhosis_combined_ethnicity,aes(cirrhosis, fill=New_ethnic_grouping))+geom_histogram(stat="count")
-histogram(~cirrhosis | New_ethnic_grouping, data=group_ethnicity_cirrhosis_combined_ethnicity)
+pdf("Output/univariable_cirrhosis/Ethnicity_cirrhosis.pdf")
+plot1 <- ggplot(group_ethnicity_cirrhosis_combined_ethnicity,aes(cirrhosis, fill=New_ethnic_grouping))+geom_histogram(stat="count")
+plot2 <- histogram(~cirrhosis | New_ethnic_grouping, data=group_ethnicity_cirrhosis_combined_ethnicity)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_group_ethnicity_cirrhosis_combined_ethnicity <-table(group_ethnicity_cirrhosis_combined_ethnicity)
+#Statistics
 fisher_group_eth_cirrhosis <-fisher.test(table_group_ethnicity_cirrhosis_combined_ethnicity)$p.value
 fisher_group_eth_cirrhosis <- round(fisher_group_eth_cirrhosis,digits = 4)
 #Odds ratio analysis
 group_ethnicity_cirrhosis_combined_ethnicity$New_ethnic_grouping <- relevel(factor(group_ethnicity_cirrhosis_combined_ethnicity$New_ethnic_grouping),ref="White British")
 logit_ethnicity_cirrhosis <- glm(cirrhosis ~ New_ethnic_grouping, data=group_ethnicity_cirrhosis_combined_ethnicity,family="binomial")
 logit_ethnicity_summ <- summ(logit_ethnicity_cirrhosis,exp=TRUE,digits = 4)
+sink("Output/univariable_cirrhosis/Ethnicity_regression_summary.txt")
+print(logit_ethnicty_summ)
+sink(file=NULL)
 ##################################################
 #Only 1 gt2a so not included(Note that ID 66 is dually infected)
 Genotype_Cirrhosis <- data %>% select(clinical_genotype___1,clinical_genotype___3,clinical_genotype___4,cirrhosis,record_id)
 Genotype_Cirrhosis <- Genotype_Cirrhosis %>% 
-    filter(record_id != 35 & record_id != 213) %>%
-    select(-record_id)
+    filter(record_id != 35 & record_id != 213 & record_id != 41)
 Genotype_Cirrhosis$cirrhosis <- factor(Genotype_Cirrhosis$cirrhosis)
 clean_Genotype_Cirrhosis <- na.omit(Genotype_Cirrhosis)
 patients_genotyped_cirrhosis <- clean_Genotype_Cirrhosis %>%
     gather(Genotype,id,clinical_genotype___1:clinical_genotype___4) %>%
     filter(id==1)
-patients_genotyped_cirrhosis <- patients_genotyped_cirrhosis[1:2]
-#Looking at the distribution
-ggplot(patients_genotyped_cirrhosis,aes(cirrhosis, fill=Genotype))+geom_histogram(stat="count")
-histogram(~cirrhosis|Genotype, data=patients_genotyped_cirrhosis)
+#Removed ID 66 dual infection cause no evidence in sequencing data
+patients_genotyped_cirrhosis <- patients_genotyped_cirrhosis %>%
+    filter(record_id != 66 | Genotype !="clinical_genotype___4")
+patients_genotyped_cirrhosis <- patients_genotyped_cirrhosis[1:3]
+pdf("Output/univariable_cirrhosis/infected_genotype_cirrhosis.pdf")
+plot1 <- ggplot(patients_genotyped_cirrhosis,aes(cirrhosis, fill=Genotype))+geom_histogram(stat="count")
+plot2 <- histogram(~cirrhosis|Genotype, data=patients_genotyped_cirrhosis)
+grid.arrange(plot1,plot2,ncol=1)
+dev.off()
 table_genotype_cirrhosis <- table(patients_genotyped_cirrhosis)
+#Statistics
 fisher_genotype_cirrhosis <- fisher.test(table_genotype_cirrhosis)$p.value
 fisher_genotype_cirrhosis <- round(fisher_genotype_cirrhosis,digits=4)
 #Odds ratio analysis
 mylogit_genotype_cirrhosis <-glm(cirrhosis ~ Genotype, data=patients_genotyped_cirrhosis,family="binomial")
 logit_genotype_summ <- summ(mylogit_genotype_cirrhosis,exp=TRUE,digits = 4)
+sink("Output/univariable_cirrhosis/Infected_genotype_regression_summary.txt")
+print(logit_genotype_summ)
+sink(file=NULL)
 ##################################################
 Diabetic_Cirrhosis <- data %>% select(comorbidities___2,cirrhosis,record_id)
 Diabetic_Cirrhosis <- Diabetic_Cirrhosis %>%
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 clean_diabetic_Cirrhosis <- na.omit(Diabetic_Cirrhosis)
-clean_diabetic_Cirrhosis <- clean_diabetic_Cirrhosis %>% mutate(Diabetes=case_when(comorbidities___2== 0~"No diabetes",TRUE~"Diabetes"))
+clean_diabetic_Cirrhosis <- clean_diabetic_Cirrhosis %>% 
+    mutate(Diabetes=case_when(comorbidities___2== 0~"No diabetes",TRUE~"Diabetes"))
 clean_diabetic_Cirrhosis <- clean_diabetic_Cirrhosis[,-1]
 clean_diabetic_Cirrhosis$cirrhosis <- factor(clean_diabetic_Cirrhosis$cirrhosis)
-ggplot(clean_diabetic_Cirrhosis,aes(cirrhosis, fill=Diabetes))+geom_histogram(stat="count")
-histogram(~cirrhosis |Diabetes , data=clean_diabetic_Cirrhosis)
+pdf("Output/univariable_cirrhosis/Diabetes_cirrhosis.pdf")
+plot1 <- ggplot(clean_diabetic_Cirrhosis,aes(cirrhosis, fill=Diabetes))+geom_histogram(stat="count")
+plot2 <- histogram(~cirrhosis |Diabetes , data=clean_diabetic_Cirrhosis)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_diabetic_cirrhosis <- table (clean_diabetic_Cirrhosis)
+#Statistics
 fisher_diabetic_cirrhosis <- fisher.test(table_diabetic_cirrhosis)$p.value
 fisher_diabetic_cirrhosis <- round(fisher_diabetic_cirrhosis,digits=4)
 #Odds ratio analysis
 clean_diabetic_Cirrhosis$Diabetes <- relevel(factor(clean_diabetic_Cirrhosis$Diabetes),ref="No diabetes")
 logit_diabetes_cirrhosis <- glm(cirrhosis ~ Diabetes, data=clean_diabetic_Cirrhosis,family="binomial")
 logit_diabetes_summ <- summ(logit_diabetes_cirrhosis,exp = TRUE,digits = 4)
+sink("Output/univariable_cirrhosis/Diabetes_regression_summary.txt")
+print(logit_diabetic_summ)
+sink(file=NULL)
 ##################################################
 Alcohol_Excess_Cirrhosis <- data %>% select(alco_excess,cirrhosis,record_id)
 Alcohol_Excess_Cirrhosis <- Alcohol_Excess_Cirrhosis %>%
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 clean_Alcohol_Excess_Cirrhosis <-na.omit(Alcohol_Excess_Cirrhosis)
 clean_Alcohol_Excess_Cirrhosis$cirrhosis <- factor(clean_Alcohol_Excess_Cirrhosis$cirrhosis)
 clean_Alcohol_Excess_Cirrhosis$alco_excess <- factor(clean_Alcohol_Excess_Cirrhosis$alco_excess)
-ggplot(clean_Alcohol_Excess_Cirrhosis,aes(cirrhosis, fill=alco_excess))+geom_histogram(stat="count")
-histogram(~cirrhosis|alco_excess,data=clean_Alcohol_Excess_Cirrhosis)
+pdf("Output/univariable_cirrhosis/alcohol_excess_cirrhosis.pdf")
+plot1 <- ggplot(clean_Alcohol_Excess_Cirrhosis,aes(cirrhosis, fill=alco_excess))+geom_histogram(stat="count")
+plot2 <-histogram(~cirrhosis|alco_excess,data=clean_Alcohol_Excess_Cirrhosis)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 table_alcohol_excess_cirrhosis <- table(clean_Alcohol_Excess_Cirrhosis)
+#Statistics
 fisher_alcohol_cirrhosis <- fisher.test(table_alcohol_excess_cirrhosis)$p.value
 fisher_alcohol_cirrhosis <- round(fisher_alcohol_cirrhosis,digits = 4)
 #Odds ratio analysis
 clean_Alcohol_Excess_Cirrhosis$alco_excess <- relevel(clean_Alcohol_Excess_Cirrhosis$alco_excess,ref="0")
 logit_alcohol_cirrhosis <- glm(cirrhosis ~ alco_excess, data=clean_Alcohol_Excess_Cirrhosis,family="binomial")
 logit_alcohol_excess_summ <- summ(logit_alcohol_cirrhosis,exp = TRUE,digits=4)
+sink("Output/univariable_cirrhosis/Alcohol_excess_regression_summary.txt")
+print(logit_alcohol_excess_summ)
+sink(file=NULL)
 ##################################################
 weight_cirrhosis <- data %>% select(weight,cirrhosis,record_id)
 weight_cirrhosis <- weight_cirrhosis %>% 
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 clean_weight_cirrhosis <- na.omit(weight_cirrhosis)
 clean_weight_cirrhosis$cirrhosis <- factor(clean_weight_cirrhosis$cirrhosis)
+pdf("Output/univariable_cirrhosis/Weight_cirrhosis.pdf")
 ggplot(clean_weight_cirrhosis,mapping=aes(x=cirrhosis,y=weight))+geom_boxplot()+scale_y_continuous()
 ggplot(clean_weight_cirrhosis)+geom_histogram(mapping=aes(x= weight),binwidth = 10)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
 ggplot(clean_weight_cirrhosis,aes(sample=weight))+stat_qq()+stat_qq_line()
+#Statistics
+shapiro.test(clean_weight_cirrhosis$weight)
 wilcox_weight_cirrhosis <- wilcox.test(weight ~ cirrhosis,clean_weight_cirrhosis)$p.value
 wilcox_weight_cirrhosis <- round(wilcox_weight_cirrhosis,digits=4)
 #Odds ratio analysis
 logit_weight_cirrhosis <- glm(cirrhosis ~ weight, data=clean_weight_cirrhosis,family="binomial")
 logit_weight_summ <- summ(logit_weight_cirrhosis,exp=TRUE)
+sink("Output/univariable_cirrhosis/Weight_regression_summary.txt")
+print(logit_weight_summ)
+sink(file=NULL)
 ##################################################
-#INCOMPLETE(VERY LOW NUMBERS CURRENTLY IN REGARDS TO CIRRHOTIC PATIENTS BEING GENOTYPED)
-#il28b_Cirrhosis <- data %>% select(ifnl4_860.factor,cirrhosis,record_id)
-#il28b_Cirrhosis <- il28b_Cirrhosis %>% 
-#    filter(record_id != 35 & record_id != 213) %>%
-#    select(-record_id)
-#clean_il28b_Cirrhosis <-na.omit(il28b_Cirrhosis)
-#clean_il28b_Cirrhosis$cirrhosis <- factor(clean_il28b_Cirrhosis$cirrhosis)
-#ggplot(clean_il28b_Cirrhosis,aes(cirrhosis,fill=ifnl4_860.factor))+geom_histogram(stat="count")
-#histogram(~cirrhosis|ifnl4_860.factor, data=clean_il28b_Cirrhosis)
-#table_il28b_cirrhosis <- table(clean_il28b_Cirrhosis)
-#fisher_il28b_cirrhosis <-fisher.test(table_il28b_cirrhosis)$p.value
+il28b_Cirrhosis <- data %>% select(ifnl4_860.factor,cirrhosis,record_id)
+il28b_Cirrhosis <- il28b_Cirrhosis %>% 
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
+    select(-record_id)
+clean_il28b_Cirrhosis <-na.omit(il28b_Cirrhosis)
+clean_il28b_Cirrhosis$cirrhosis <- factor(clean_il28b_Cirrhosis$cirrhosis)
+ggplot(clean_il28b_Cirrhosis,aes(cirrhosis,fill=ifnl4_860.factor))+geom_histogram(stat="count")
+histogram(~cirrhosis|ifnl4_860.factor, data=clean_il28b_Cirrhosis)
+table_il28b_cirrhosis <- table(clean_il28b_Cirrhosis)
+fisher_il28b_cirrhosis <-fisher.test(table_il28b_cirrhosis)$p.value
 #Odds ratio analysis
-#logit_il28b_cirrhosis <- glm(cirrhosis ~ ifnl4_860.factor, data=,family="binomial")
-#logit_il28b_cirrhosis_summ <-summ(logit_il28b_cirrhosis,exp=TRUE)
+logit_il28b_cirrhosis <- glm(cirrhosis ~ ifnl4_860.factor, data=,family="binomial")
+logit_il28b_cirrhosis_summ <-summ(logit_il28b_cirrhosis,exp=TRUE)
 #Combine CT and TT due to low numbers of TT and not wanting to use CC as reference
-#combined_CT_TT_levels_cirrhosis <- clean_il28b_Cirrhosis %>%
-#    mutate(Genotype_binary=case_when(ifnl4_860.factor == "CT"| ifnl4_860.factor == "TT" ~"non-CC",
-#                                     TRUE ~ "CC"))
-#combined_CT_TT_levels_cirrhosis <- combined_CT_TT_levels_cirrhosis[,-1]
-#table_combined_il28b <-table(combined_CT_TT_levels_cirrhosis)
-#fisher_combined_il28b_co <- fisher.test(table_combined_il28b)$p.value
+combined_CT_TT_levels_cirrhosis <- clean_il28b_Cirrhosis %>%
+    mutate(Genotype_binary=case_when(ifnl4_860.factor == "CT"| 
+                                     ifnl4_860.factor == "TT" ~"non-CC",
+                                     TRUE ~ "CC"))
+combined_CT_TT_levels_cirrhosis <- combined_CT_TT_levels_cirrhosis[,-1]
+pdf("Output/univariable_sc/IL28b_sc.pdf")
+plot1 <- ggplot(combined_CT_TT_levels_cirrhosis, aes(cirrhosis,fill=Genotype_binary))+geom_histogram(stat="count")
+plot2 <- histogram(~cirrhosis|Genotype_binary, data=combined_CT_TT_levels_cirrhosis)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
+table_combined_il28b <-table(combined_CT_TT_levels_cirrhosis)
+fisher_combined_il28b_co <- fisher.test(table_combined_il28b)$p.value
 #Odds ratio analysis
-#combined_CT_TT_levels_cirrhosis$Genotype_binary <- relevel(factor(combined_CT_TT_levels_cirrhosis$Genotype_binary),ref = "non-CC")
-#logit_combined_il28b_cirrhosis <- glm(cirrhosis ~ Genotype_binary,data=combined_CT_TT_levels_cirrhosis,family = "binomial")
-#logit_combined_il28b_summ <- summ(logit_combined_il28b_cirrhosis,exp=TRUE)
+combined_CT_TT_levels_cirrhosis$Genotype_binary <- relevel(factor(combined_CT_TT_levels_cirrhosis$Genotype_binary),ref = "non-CC")
+logit_combined_il28b_cirrhosis <- glm(cirrhosis ~ Genotype_binary,data=combined_CT_TT_levels_cirrhosis,family = "binomial")
+logit_combined_il28b_summ <- summ(logit_combined_il28b_cirrhosis,exp=TRUE)
+sink("Output/univariable_cirrhosis/IL28B_regression_summary.txt")
+print(logit_combined_il28b_summ)
+sink(file=NULL)
 ###################################################
 #IL28b missing
 stats_table <- data.frame(Variable=c("Gender","Age","Ethnicity","HIV status","CD4(HIV +ve patients only)","ARVS(HIV+ve patients only)","peak ALT(>1000)","cAb HBV","chronic HBV",
