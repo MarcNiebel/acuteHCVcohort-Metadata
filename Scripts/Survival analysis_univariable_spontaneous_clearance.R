@@ -22,18 +22,23 @@ total_data <- total_data %>%
 ##################################################
 spont_clearance_time_gender <- total_data %>% select(record_id,Event,Time,gender.factor)
 spont_clearance_time_gender$gender.factor <-relevel(factor(spont_clearance_time_gender$gender.factor),ref="Male")
-ggsurvplot(survfit(Surv(Time,Event)~gender.factor,data=spont_clearance_time_gender),
+gender_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~gender.factor,data=spont_clearance_time_gender),
            xlab="Days",
            ylab="Proportion of HCV persistence",
            legend.title="Sex",
            legend.labs=c("Male","Female"),
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/gender_KM.pdf",print(gender_KMplot),onefile=FALSE)
 #Looking at how this has changed at specific points in time
 summary(survfit(Surv(Time,Event)~gender.factor,data=spont_clearance_time_gender),times=182.5)
 summary(survfit(Surv(Time,Event)~gender.factor,data=spont_clearance_time_gender),times=365.25)
+
 cox_gender_co <-coxph(Surv(Time,Event)~gender.factor,data=spont_clearance_time_gender)
-summary(cox_gender_co)
+test <- summary(cox_gender_co)
+ggsave(file="Output/survival analysis_uni_sc/test.txt",print(test))
+print(test)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_gender <- cox.zph(cox_gender_co)
 ggcoxzph(cox_assumption_gender)
