@@ -1,9 +1,7 @@
 #Created by Marc Niebel November 2019
 #Univariate analysis on acute HCV metadata vs clinical outcome: cirrhosis
-#Need to remove all flipping of progression and sc
-#Generate a table of test results
-#Generate a table of odds ratio and p-values
 
+#Libraries required
 library(dplyr)
 library(tidyr)
 library(reshape2)
@@ -12,25 +10,34 @@ library(gridExtra)
 library(jtools)
 
 ###################################################
+#Sourcing the dataframe from the data folder
+source("./data/AcuteHCV_R_2020-04-22_1120.r", chdir = TRUE)
+###################################################
 Gender_Cirrhosis <- data %>% select(gender.factor,cirrhosis,record_id)
+#Removing chronic patients
 Gender_Cirrhosis <- Gender_Cirrhosis %>%
-    filter(record_id != 35 & record_id != 213) %>%
+    filter(record_id != 35 & record_id != 213 & record_id != 41) %>%
     select(-record_id)
 #Remove any NA rows
 clean_Gender_Cirrhosis <- na.omit(Gender_Cirrhosis)
-#Allow for graphs to be drawn
 clean_Gender_Cirrhosis$cirrhosis <- factor(clean_Gender_Cirrhosis$cirrhosis)
-#Two types of graphs
-ggplot(clean_Gender_Cirrhosis,aes(cirrhosis, fill=gender.factor))+geom_histogram(stat="count")
-histogram(~cirrhosis|gender.factor, data=clean_Gender_Cirrhosis)
-#Statistics
+pdf("Output/univariable_cirrhosis/Gender_cirrhosis.pdf")
+plot1 <- ggplot(clean_Gender_Cirrhosis,aes(cirrhosis, fill=gender.factor))+geom_histogram(stat="count")
+plot2 <- histogram(~cirrhosis|gender.factor, data=clean_Gender_Cirrhosis)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
+#Shows a contigency table
 table_gender_cirrhosis <- table(clean_Gender_Cirrhosis)
+#Statistics
 fisher_g_cirrhosis <- fisher.test(table_gender_cirrhosis)$p.value
 fisher_g_cirrhosis <- round(fisher_g_cirrhosis,digits = 4)
 #Odds ratio analysis
 clean_Gender_Cirrhosis$gender.factor <- relevel(clean_Gender_Cirrhosis$gender.factor,ref="Female")
 logit_gender_cirrhosis <- glm(cirrhosis ~ gender.factor, data=clean_Gender_Cirrhosis,family = "binomial")
 logit_gender_summ <- summ(logit_gender_cirrhosis,exp=TRUE,digits = 4)
+sink("Output/univariable_cirrhosis/Gender_cirrhosis_regression_summary.txt")
+print(logit_gender_summ)
+sink(file=NULL)
 ###################################################
 Age_Cirrhosis <- data %>% select(age,cirrhosis,record_id)
 Age_Cirrhosis <- Age_Cirrhosis %>%
