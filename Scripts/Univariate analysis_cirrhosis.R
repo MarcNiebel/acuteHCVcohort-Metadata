@@ -324,7 +324,7 @@ fisher_b_viral_load_binary_cirrhosis <- round(fisher_b_viral_load_binary_cirrhos
 b_viral_load_Cirrhosis_binary$Viral_load <- relevel(factor(b_viral_load_Cirrhosis_binary$Viral_load),ref="low")
 logit_baselineviralload_cirrhosis <- glm(cirrhosis ~ Viral_load, data=b_viral_load_Cirrhosis_binary,family="binomial")
 logit_b_viral_load_summ <- summ(logit_baselineviralload_cirrhosis,exp=TRUE,digits = 4)
-sink("Output/univariable_sc/baseline_viral_load_regresssion_summary.txt")
+sink("Output/univariable_cirrhosis/baseline_viral_load_regresssion_summary.txt")
 print(logit_b_viral_load_summ)
 sink(file=NULL)
 ###################################################
@@ -488,7 +488,7 @@ group_ethnicity_cirrhosis_combined_ethnicity$New_ethnic_grouping <- relevel(fact
 logit_ethnicity_cirrhosis <- glm(cirrhosis ~ New_ethnic_grouping, data=group_ethnicity_cirrhosis_combined_ethnicity,family="binomial")
 logit_ethnicity_summ <- summ(logit_ethnicity_cirrhosis,exp=TRUE,digits = 4)
 sink("Output/univariable_cirrhosis/Ethnicity_regression_summary.txt")
-print(logit_ethnicty_summ)
+print(logit_ethnicity_summ)
 sink(file=NULL)
 ##################################################
 #Only 1 gt2a so not included(Note that ID 66 is dually infected)
@@ -503,7 +503,7 @@ patients_genotyped_cirrhosis <- clean_Genotype_Cirrhosis %>%
 #Removed ID 66 dual infection cause no evidence in sequencing data
 patients_genotyped_cirrhosis <- patients_genotyped_cirrhosis %>%
     filter(record_id != 66 | Genotype !="clinical_genotype___4")
-patients_genotyped_cirrhosis <- patients_genotyped_cirrhosis[1:3]
+patients_genotyped_cirrhosis <- patients_genotyped_cirrhosis[c(1,3)]
 pdf("Output/univariable_cirrhosis/infected_genotype_cirrhosis.pdf")
 plot1 <- ggplot(patients_genotyped_cirrhosis,aes(cirrhosis, fill=Genotype))+geom_histogram(stat="count")
 plot2 <- histogram(~cirrhosis|Genotype, data=patients_genotyped_cirrhosis)
@@ -627,7 +627,6 @@ sink("Output/univariable_cirrhosis/IL28B_regression_summary.txt")
 print(logit_combined_il28b_summ)
 sink(file=NULL)
 ###################################################
-#IL28b missing
 stats_table <- data.frame(Variable=c("Gender","Age","Ethnicity","HIV status","CD4(HIV +ve patients only)","ARVS(HIV+ve patients only)","peak ALT(>1000)",
                                      "cAb HBV","chronic HBV","Drug use","Cocaine use","Methamphetamine use","Heroin use", "baseline viral load(>800,000 IU/ml)",
                                      "peak Bilirubin(>20)","Risk factor:PWID", "Risk factor:MSM","Genotype","Diabetes",

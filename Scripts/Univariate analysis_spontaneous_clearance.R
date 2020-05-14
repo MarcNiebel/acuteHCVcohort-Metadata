@@ -497,7 +497,7 @@ patients_genotyped <-clean_Genotype_clinicalOutcome %>%
 #Removed ID 66 dual infection cause no evidence in sequencing data
 patients_genotyped <- patients_genotyped %>%
     filter(record_id != 66 | Genotype !="clinical_genotype___4")
-patients_genotyped <- patients_genotyped[1:3]
+patients_genotyped <- patients_genotyped[c(1,3)]
 pdf("Output/univariable_sc/infected_genotype_sc.pdf")
 plot1 <- ggplot(patients_genotyped,aes(sc, fill=Genotype))+geom_histogram(stat="count")
 plot2 <- histogram(~sc|Genotype, data=patients_genotyped)
