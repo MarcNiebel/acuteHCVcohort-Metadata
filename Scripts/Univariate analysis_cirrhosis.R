@@ -618,7 +618,7 @@ plot2 <- histogram(~cirrhosis|Genotype_binary, data=combined_CT_TT_levels_cirrho
 grid.arrange(plot1,plot2,nrow=1)
 dev.off()
 table_combined_il28b <-table(combined_CT_TT_levels_cirrhosis)
-fisher_combined_il28b_co <- fisher.test(table_combined_il28b)$p.value
+fisher_combined_il28b_cirrhosis <- fisher.test(table_combined_il28b)$p.value
 #Odds ratio analysis
 combined_CT_TT_levels_cirrhosis$Genotype_binary <- relevel(factor(combined_CT_TT_levels_cirrhosis$Genotype_binary),ref = "non-CC")
 logit_combined_il28b_cirrhosis <- glm(cirrhosis ~ Genotype_binary,data=combined_CT_TT_levels_cirrhosis,family = "binomial")
@@ -637,7 +637,7 @@ stats_table <- data.frame(Variable=c("Gender","Age","Ethnicity","HIV status","CD
                                     fisher_all_drug_use_cirrhosis,fisher_cocaine_cir,fisher_meth_cir,fisher_heroin_cir,
                                     fisher_b_viral_load_binary_cirrhosis,fisher_peakBil_binary_cirrhosis,fisher_IDU_cirrhosis,fisher_MSM_cir,
                                     fisher_genotype_cirrhosis,fisher_diabetic_cirrhosis,fisher_alcohol_cirrhosis,wilcox_weight_cirrhosis,
-                                    fisher_immuno_cirrhosis))
+                                    fisher_immuno_cirrhosis,fisher_combined_il28b_cirrhosis))
 pdf("stats_table_cirrhosis.pdf")
 grid.table(stats_table)
 dev.off()
