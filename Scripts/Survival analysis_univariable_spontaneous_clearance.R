@@ -7,6 +7,7 @@ library(survminer)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(gridExtra)
 library(broom)
 
 ###################################################
@@ -33,54 +34,66 @@ ggsave(file="Output/survival analysis_uni_sc/gender_KM.pdf",print(gender_KMplot)
 #Looking at how this has changed at specific points in time
 summary(survfit(Surv(Time,Event)~gender.factor,data=spont_clearance_time_gender),times=182.5)
 summary(survfit(Surv(Time,Event)~gender.factor,data=spont_clearance_time_gender),times=365.25)
-
 cox_gender_co <-coxph(Surv(Time,Event)~gender.factor,data=spont_clearance_time_gender)
-test <- summary(cox_gender_co)
-ggsave(file="Output/survival analysis_uni_sc/test.txt",print(test))
-print(test)
+sink("Output/survival analysis_uni_sc/cox_gender.txt")
+print(cox_gender_co)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_gender <- cox.zph(cox_gender_co)
-ggcoxzph(cox_assumption_gender)
+schoenfield_gender <- ggcoxzph(cox_assumption_gender)
+ggsave("Output/survival analysis_uni_sc/schoenfield_gender.pdf", arrangeGrob(grobs=schoenfield_gender))
 ########################################
 spont_clearance_time_age <- total_data %>% select(record_id,Time,Event,age)
 cox_age_co <-coxph(Surv(Time,Event)~age,data=spont_clearance_time_age)
-summary(cox_age_co)
+sink("Output/survival analysis_uni_sc/cox_age.txt")
+print(cox_age_co)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_age <- cox.zph(cox_age_co)
-ggcoxzph(cox_assumption_age)
+schoenfield_age <- ggcoxzph(cox_assumption_age)
+ggsave("Output/survival analysis_uni_sc/schoenfield_age.pdf", arrangeGrob(grobs=schoenfield_age))
 ########################################
 spont_clearance_time_HIVstatus <- total_data %>% select(record_id,Event,Time,hiv)
 spont_clearance_time_HIVstatus$hiv <- relevel(factor(spont_clearance_time_HIVstatus$hiv),ref="1")
-ggsurvplot(survfit(Surv(Time,Event)~hiv,data=spont_clearance_time_HIVstatus),
+age_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~hiv,data=spont_clearance_time_HIVstatus),
            xlab="Days",
            ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           legend.title="HIV Status",
+           legend.labs=c("HIV negative","HIV positive"),
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/age_KM.pdf",print(age_KMplot),onefile=FALSE)
 summary(survfit(Surv(Time,Event)~hiv,data=spont_clearance_time_HIVstatus),times=182.5)
 summary(survfit(Surv(Time,Event)~hiv,data=spont_clearance_time_HIVstatus),times=365.25)
 cox_hiv_co <- coxph(Surv(Time,Event)~hiv,data=spont_clearance_time_HIVstatus)
-summary(cox_hiv_co)
+sink("Output/survival analysis_uni_sc/cox_hiv.txt")
+print(cox_hiv_co)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_hiv <- cox.zph(cox_hiv_co)
-ggcoxzph(cox_assumption_hiv)
+schoenfield_hiv <- ggcoxzph(cox_assumption_hiv)
+ggsave("Output/survival analysis_uni_sc/schoenfield_hiv.pdf", arrangeGrob(grobs=schoenfield_hiv))
 ########################################
 spont_clearance_time_peakALT <-total_data %>%select(record_id,Event,Time,alt_peak)
 clean_spont_clearance_time_peakALT <-na.omit(spont_clearance_time_peakALT)
 peakALT_ClinicalOutcome_binary <- clean_spont_clearance_time_peakALT %>% mutate(Binary_peakALT=case_when(alt_peak >=1000 ~ ">1000",TRUE~"<1000"))
 peakALT_ClinicalOutcome_binary <- peakALT_ClinicalOutcome_binary[,-4]
-ggsurvplot(survfit(Surv(Time,Event)~Binary_peakALT,data=peakALT_ClinicalOutcome_binary),
+peakALT_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Binary_peakALT,data=peakALT_ClinicalOutcome_binary),
            xlab="Days",
            ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           legend.title="Peak ALT",
+           legend.labs=c("peak ALT<1000","peak ALT>1000"),
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/peakALT_KM.pdf",print(peakALT_KMplot),onefile=FALSE)
 cox_peakALT_co <-coxph(Surv(Time,Event)~Binary_peakALT,data=peakALT_ClinicalOutcome_binary)
-summary(cox_peakALT_co)
+sink("Output/survival analysis_uni_sc/cox_peakALT.txt")
+print(cox_peakALT_co)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_peakALT <-cox.zph(cox_peakALT_co)
-ggcoxzph(cox_assumption_peakALT)
+schoenfield_peakALT <- ggcoxzph(cox_assumption_peakALT)
+ggsave("Output/survival analysis_uni_sc/schoenfield_peakALT.pdf", arrangeGrob(grobs=schoenfield_hiv))
 ########################################
 spont_clearance_time_drug_use <- total_data %>% select(record_id,Event,Time,drugs___20:drugs___19)
 all_Drug_use <- spont_clearance_time_drug_use %>% mutate(Drug_use=case_when(drugs___20 == 1|drugs___21 == 1|
