@@ -353,17 +353,20 @@ cox_assumption_b_viral_load <- cox.zph(cox_baseline_viral_load_binary)
 schoenfield_b_viral_load <- ggcoxzph(cox_assumption_b_viral_load)
 ggsave("Output/survival analysis_uni_sc/schoenfield_baseline_viral_load.pdf", arrangeGrob(grobs=schoenfield_b_viral_load))
 ########################################
-#ID 66 is documented as being dually infected. Being included as two entries currently.
+#ID 66 is documented as being dually infected.
 spont_clearance_time_genotype <- total_data %>% select(record_id,Event,Time,clinical_genotype___1,clinical_genotype___3,clinical_genotype___4)
 names(spont_clearance_time_genotype)[4:6]<-(c("gt1a","gt3a","gt4d"))
 patients_genotyped <- spont_clearance_time_genotype %>%
     gather(Genotype,ID,gt1a:gt4d) %>%
     filter(ID==1)
+#Removed ID 66 dual infection cause no evidence in sequencing data
+patients_genotyped <- patients_genotyped %>%
+    filter(record_id != 66 | Genotype !="gt4d")
 patients_genotyped <- patients_genotyped[,-5]
-ggsurvplot(survfit(Surv(Time,Event)~Genotype,data=patients_genotyped),
+genotype_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Genotype,data=patients_genotyped),
            xlab="Days",
            ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           legend.title="Infected Genotype",
            pval = TRUE,
            conf.int = TRUE)
 cox_genotype_co <-coxph(Surv(Time,Event)~Genotype,data=patients_genotyped)
