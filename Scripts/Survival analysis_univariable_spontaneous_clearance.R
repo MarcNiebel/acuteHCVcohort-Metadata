@@ -96,50 +96,62 @@ schoenfield_peakALT <- ggcoxzph(cox_assumption_peakALT)
 ggsave("Output/survival analysis_uni_sc/schoenfield_peakALT.pdf", arrangeGrob(grobs=schoenfield_hiv))
 ########################################
 spont_clearance_time_drug_use <- total_data %>% select(record_id,Event,Time,drugs___20:drugs___19)
-all_Drug_use <- spont_clearance_time_drug_use %>% mutate(Drug_use=case_when(drugs___20 == 1|drugs___21 == 1|
-                                                                               drugs___22 == 1|drugs___1 == 1 |
-                                                                               drugs___2 ==1 | drugs___3 == 1 |
-                                                                               drugs___4 == 1 | drugs___5 == 1|
-                                                                               drugs___6 ==1 | drugs___7 ==1|
-                                                                               drugs___8 == 1  |drugs___9 == 1| 
-                                                                               drugs___10 == 1 |drugs___11 == 1|
-                                                                               drugs___12 == 1| drugs___13 ==1|
-                                                                               drugs___14 ==1 | drugs___15 == 1|
-                                                                               drugs___16 == 1 |drugs___17 == 1|
-                                                                               drugs___18 ==1 |drugs___19 == 1
-                                                                               ~ "Drug use",TRUE ~ "no use"))
+all_Drug_use <- spont_clearance_time_drug_use %>% 
+    mutate(Drug_use=case_when(drugs___20 == 1|drugs___21 == 1|
+                              drugs___22 == 1|drugs___1 == 1 |
+                              drugs___2 ==1 | drugs___3 == 1 |
+                              drugs___4 == 1 | drugs___5 == 1|
+                              drugs___6 ==1 | drugs___7 ==1|
+                              drugs___8 == 1  |drugs___9 == 1| 
+                              drugs___10 == 1 |drugs___11 == 1|
+                              drugs___12 == 1| drugs___13 ==1|
+                              drugs___14 ==1 | drugs___15 == 1|
+                              drugs___16 == 1 |drugs___17 == 1|
+                              drugs___18 ==1 |drugs___19 == 1
+                              ~ "Drug use",TRUE ~ "no use"))
 all_Drug_use <-all_Drug_use[c(1:3,26)]
 all_Drug_use$Drug_use <-relevel(factor(all_Drug_use$Drug_use),ref = "no use")
-ggsurvplot(survfit(Surv(Time,Event)~Drug_use,data=all_Drug_use),
+druguse_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Drug_use,data=all_Drug_use),
            xlab="Days",
            ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           legend.title="Drug Use",
+           legend.labs=c("No Drug Use","Drug Use"),
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/Drug_Use_KM.pdf",print(druguse_KMplot),onefile=FALSE)
 cox_drug_use_co <- coxph(Surv(Time,Event)~Drug_use,data=all_Drug_use)
-summary(cox_drug_use_co)
+sink("Output/survival analysis_uni_sc/cox_drug_use.txt")
+print(cox_drug_use_co)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_druguse <- cox.zph(cox_drug_use_co)
-ggcoxzph(cox_assumption_druguse)
+schoenfield_druguse <- ggcoxzph(cox_assumption_druguse)
+ggsave("Output/survival analysis_uni_sc/schoenfield_druguse.pdf", arrangeGrob(grobs=schoenfield_druguse))
 ########################################
 spont_clearance_time_cocaine_use <-total_data %>%select(record_id,Event,Time,drugs___10,drugs___11,drugs___12,drugs___13)
-Cocaine_use <- spont_clearance_time_cocaine_use %>% mutate(Cocaine_use=case_when(drugs___10 ==1|
-                                                                             drugs___11==1|
-                                                                             drugs___12==1|
-                                                                             drugs___13==1 ~ "use", TRUE ~"no use"))
+Cocaine_use <- spont_clearance_time_cocaine_use %>% 
+    mutate(Cocaine_use=case_when(drugs___10 ==1|
+                                 drugs___11==1|
+                                 drugs___12==1|
+                                 drugs___13==1 ~ "use", TRUE ~"no use"))
 cocaine_use_co <-Cocaine_use[c(1:3,8)]
 cocaine_use_co$Cocaine_use <- relevel(factor(cocaine_use_co$Cocaine_use),ref="no use")
-ggsurvplot(survfit(Surv(Time,Event)~Cocaine_use,data=cocaine_use_co),
+cocaineuse_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Cocaine_use,data=cocaine_use_co),
            xlab="Days",
            ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           legend.title="Cocaine Use",
+           legend.labs=c("No Cocaine Use","Cocaine Use"),
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/Cocaine_Use_KM.pdf",print(cocaineuse_KMplot),onefile=FALSE)
 cox_cocaine_co <-coxph(Surv(Time,Event)~Cocaine_use,data=cocaine_use_co)
-summary(cox_cocaine_co)
+sink("Output/survival analysis_uni_sc/cox_cocaine_use.txt")
+print(cox_cocaine_co)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_cocaine <-cox.zph(cox_cocaine_co)
-ggcoxzph(cox_assumption_cocaine)
+schoenfield_cocaineuse <- ggcoxzph(cox_assumption_cocaine)
+ggsave("Output/survival analysis_uni_sc/schoenfield_cocaineuse.pdf", arrangeGrob(grobs=schoenfield_cocaineuse))
 ########################################
 spont_clearance_time_methuse <-total_data %>% select(record_id,Event,Time,drugs___1:drugs___3)
 Meth_use <- spont_clearance_time_methuse %>% mutate(Meth_use=case_when(drugs___1 ==1|
