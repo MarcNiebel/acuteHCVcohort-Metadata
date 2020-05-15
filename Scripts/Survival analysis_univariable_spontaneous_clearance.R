@@ -283,24 +283,15 @@ sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_cAb_HBV <- cox.zph(cox_cAb_HBV_co)
 schoenfield_cAb_HBV <- ggcoxzph(cox_assumption_cAb_HBV)
-ggsave("Output/survival analysis_uni_sc/schoenfield_immuno.pdf", arrangeGrob(grobs=schoenfield_immuno))
+ggsave("Output/survival analysis_uni_sc/schoenfield_cAb_HBV.pdf", arrangeGrob(grobs=schoenfield_cAb_HBV))
 ########################################
 #Incomplete dataset(PROBLEMATIC)
 spont_clearance_time_chronic_HBV <- total_data %>% select(record_id,Time,Event,hbvsag_pcr.factor)
 names(spont_clearance_time_chronic_HBV)[4] <-"Chronic_HBV"
 clean_spont_clearance_time_chronic_HBV <- na.omit(spont_clearance_time_chronic_HBV)
 clean_spont_clearance_time_chronic_HBV$Chronic_HBV<- relevel(factor(clean_spont_clearance_time_chronic_HBV$Chronic_HBV),ref="Negative")
-ggsurvplot(survfit(Surv(Time,Event)~Chronic_HBV,data=clean_spont_clearance_time_chronic_HBV),
-           xlab="Days",
-           ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
-           pval = TRUE,
-           conf.int = TRUE)
-#NOT POSSIBLE (BELOW)
-#Main issue is 0 value
 table(clean_spont_clearance_time_chronic_HBV$Event,clean_spont_clearance_time_chronic_HBV$Chronic_HBV)
-#cox_chronic_HBV_co <-coxph(Surv(Time,Event)~Chronic_HBV,data=clean_spont_clearance_time_chronic_HBV)
-#summary(cox_chronic_HBV_co)
+#Neither KM or Cox Regression are done due
 ########################################
 #HIV positive patients only
 spont_clearance_time_CD4 <- total_data %>% select(record_id,Time,Event,cd4_at_hcv_diagnosis,hiv)
@@ -309,28 +300,36 @@ spont_clearance_time_CD4_hiv_pos <- spont_clearance_time_CD4 %>% filter(hiv==1)
 spont_clearance_time_CD4_hiv_pos <- spont_clearance_time_CD4_hiv_pos[,-5]
 clean_spont_clear_time_cd4 <- na.omit(spont_clearance_time_CD4_hiv_pos)
 cox_CD4_co <-coxph(Surv(Time,Event)~CD4_count,data=clean_spont_clear_time_cd4)
-summary(cox_CD4_co)
+sink("Output/survival analysis_uni_sc/cox_CD4.txt")
+print(cox_CD4_co)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_CD4 <- cox.zph(cox_CD4_co)
-ggcoxzph(cox_assumption_CD4)
+schoenfield_CD4 <-ggcoxzph(cox_assumption_CD4)
+ggsave("Output/survival analysis_uni_sc/schoenfield_CD4.pdf", arrangeGrob(grobs=schoenfield_CD4))
 ########################################
 spont_clearance_time_peakBil <- total_data %>% select(record_id,Time,Event,bil_peak_1)
 clean_spont_clearance_time_peakBil <- na.omit(spont_clearance_time_peakBil)
 peakBil_binary <- clean_spont_clearance_time_peakBil  %>% mutate(peak_Bil_binary=case_when(bil_peak_1 >=20 ~">= 20",TRUE ~ "< 20"))
 peakBil_binary <-peakBil_binary[,-4]
-ggsurvplot(survfit(Surv(Time,Event)~peak_Bil_binary,data=peakBil_binary),
+peakBil_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~peak_Bil_binary,data=peakBil_binary),
            xlab="Days",
            ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           legend.title="peak Bilirubin",
+           legend.labs=c("peak Bilirubin < 20","peak Bilirubin > 20"),
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/peakBil_KM.pdf",print(peakBil_KMplot),onefile=FALSE)
 summary(survfit(Surv(Time,Event)~peak_Bil_binary,data=peakBil_binary),times=182.5)
 summary(survfit(Surv(Time,Event)~peak_Bil_binary,data=peakBil_binary),times=365.25)
 cox_peakBil_co <-coxph(Surv(Time,Event)~peak_Bil_binary,data=peakBil_binary)
-summary(cox_peakBil_co)
+sink("Output/survival analysis_uni_sc/cox_peakBilirubin.txt")
+print(cox_peakBil_co)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_peakBil <-cox.zph(cox_peakBil_co)
-ggcoxzph(cox_assumption_peakBil)
+schoenfield_peakBil <- ggcoxzph(cox_assumption_peakBil)
+ggsave("Output/survival analysis_uni_sc/schoenfield_peakBil.pdf", arrangeGrob(grobs=schoenfield_peakBil))
 ########################################
 spont_clearance_time_b_viral_load <- total_data %>% select(record_id,Event,Time,vl1)
 clean_spont_clearance_time_b_viral_load <- na.omit(spont_clearance_time_b_viral_load)
@@ -338,17 +337,21 @@ clean_spont_clearance_time_b_viral_load <- na.omit(spont_clearance_time_b_viral_
 b_viral_load <-clean_spont_clearance_time_b_viral_load  %>% mutate(Viral_load=case_when(vl1 < 800000 ~ "low",TRUE ~ "high"))
 b_viral_load_remove_number <- b_viral_load[,-4]
 b_viral_load_remove_number$Viral_load <- relevel(factor(b_viral_load_remove_number$Viral_load),ref="low")
-ggsurvplot(survfit(Surv(Time,Event)~Viral_load,data=b_viral_load_remove_number),
+b_viral_load_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Viral_load,data=b_viral_load_remove_number),
            xlab="Days",
            ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           legend.title="Baseline Viral Load",
+           legend.labs=c("low(<8x10^5)","high(>8x10^5)"),
            pval = TRUE,
            conf.int = TRUE)
 cox_baseline_viral_load_binary <- coxph(Surv(Time,Event)~Viral_load,data=b_viral_load_remove_number)
-summary(cox_baseline_viral_load_binary)
+sink("Output/survival analysis_uni_sc/cox_viral_load.txt")
+print(cox_baseline_viral_load_binary)
+sink(file=NULL)
 #Proportional hazards assumption
-cox_assumption_b_viral_load <-cox.zph(cox_baseline_viral_load_binary)
-ggcoxzph(cox_assumption_b_viral_load)
+cox_assumption_b_viral_load <- cox.zph(cox_baseline_viral_load_binary)
+schoenfield_b_viral_load <- ggcoxzph(cox_assumption_b_viral_load)
+ggsave("Output/survival analysis_uni_sc/schoenfield_baseline_viral_load.pdf", arrangeGrob(grobs=schoenfield_b_viral_load))
 ########################################
 #ID 66 is documented as being dually infected. Being included as two entries currently.
 spont_clearance_time_genotype <- total_data %>% select(record_id,Event,Time,clinical_genotype___1,clinical_genotype___3,clinical_genotype___4)
