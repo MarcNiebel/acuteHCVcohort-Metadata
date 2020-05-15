@@ -155,39 +155,49 @@ ggsave("Output/survival analysis_uni_sc/schoenfield_cocaineuse.pdf", arrangeGrob
 ########################################
 spont_clearance_time_methuse <-total_data %>% select(record_id,Event,Time,drugs___1:drugs___3)
 Meth_use <- spont_clearance_time_methuse %>% mutate(Meth_use=case_when(drugs___1 ==1|
-                                                                             drugs___2 ==1|
-                                                                             drugs___3 ==1 ~"use",TRUE ~ "no use"))
+                                                                       drugs___2 ==1|
+                                                                       drugs___3 ==1 ~"use",TRUE ~ "no use"))
 meth_use_co <- Meth_use[c(1:3,7)]
 meth_use_co$Meth_use <- relevel(factor(meth_use_co$Meth_use),ref = "no use")
-ggsurvplot(survfit(Surv(Time,Event)~Meth_use,data=meth_use_co),
+methuse_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Meth_use,data=meth_use_co),
            xlab="Days",
            ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           legend.title ="Meth Use",
+           legend.labs=c("No Meth Use","Meth Use"),
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/Meth_Use_KM.pdf",print(methuse_KMplot),onefile=FALSE)
 cox_meth_co <-coxph(Surv(Time,Event)~Meth_use,data=meth_use_co)
-summary(cox_meth_co)
+sink("Output/survival analysis_uni_sc/cox_meth_use.txt")
+print(cox_meth_co)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_methuse <- cox.zph(cox_meth_co)
-ggcoxzph(cox_assumption_methuse)
+schoenfield_methuse <- ggcoxzph(cox_assumption_methuse)
+ggsave("Output/survival analysis_uni_sc/schoenfield_methuse.pdf", arrangeGrob(grobs=schoenfield_methuse))
 ########################################
 spont_clearance_time_heroinuse <-total_data %>% select(record_id,Event,Time,drugs___20)
 heroin_use <- spont_clearance_time_heroinuse %>% mutate(Heroin_use=case_when(drugs___20==1 ~ "use",TRUE ~"no use"))
 heroin_use_co <- heroin_use[c(1:3,5)]
 heroin_use_co$Heroin_use <-relevel(factor(heroin_use_co$Heroin_use),ref="no use")
-ggsurvplot(survfit(Surv(Time,Event)~Heroin_use,data=heroin_use_co),
+heroinuse_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Heroin_use,data=heroin_use_co),
            xlab="Days",
            ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           legend.title="Heroin Use",
+           legend.labs=c("Heroin No Use", "Heroin Use"),
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/Heroin_Use_KM.pdf",print(heroinuse_KMplot),onefile=FALSE)
 summary(survfit(Surv(Time,Event)~Heroin_use,data=heroin_use_co),times=182.5)
 summary(survfit(Surv(Time,Event)~Heroin_use,data=heroin_use_co),times=365.25)
 cox_heroin_co <-coxph(Surv(Time,Event)~Heroin_use,data=heroin_use_co)
-summary(cox_heroin_co)
+sink("Output/survival analysis_uni_sc/cox_heroin_use.txt")
+print(cox_heroin_co)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_heroin <-cox.zph(cox_heroin_co)
-ggcoxzph(cox_assumption_heroin)
+schoenfield_heroinuse <- ggcoxzph(cox_assumption_heroin)
+ggsave("Output/survival analysis_uni_sc/schoenfield_heroinuse.pdf", arrangeGrob(grobs=schoenfield_heroinuse))
 ########################################
 #HIV positive patients only
 spont_clearance_time_ARVS <- total_data %>% select(record_id,Event,Time,hiv_tx_at_hcv_diagnosis,hiv)
@@ -196,64 +206,84 @@ spont_clearance_time_ARVS_HIV_pos <- spont_clearance_time_ARVS %>% filter(hiv==1
 spont_clearance_time_ARVS_HIV_pos <- spont_clearance_time_ARVS_HIV_pos[,-5]
 clean_spont_clearance_time_ARVS_HIV_pos <-na.omit(spont_clearance_time_ARVS_HIV_pos)
 clean_spont_clearance_time_ARVS_HIV_pos$ARVs <- relevel(factor(clean_spont_clearance_time_ARVS_HIV_pos$ARVs),ref="0")
-ggsurvplot(survfit(Surv(Time,Event)~ARVs,data=clean_spont_clearance_time_ARVS_HIV_pos),
+ARVs_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~ARVs,data=clean_spont_clearance_time_ARVS_HIV_pos),
            xlab="Days",
            ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           legend.title ="Patients on ARVs",
+           legend.labs=c("On ARVs","Not on ARVs"),
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/ARVs_Use_KM.pdf",print(ARVs_KMplot),onefile=FALSE)
 cox_ARVS_co <-coxph(Surv(Time,Event)~ARVs,data=clean_spont_clearance_time_ARVS_HIV_pos)
-summary(cox_ARVS_co)
+sink("Output/survival analysis_uni_sc/cox_ARVs_use.txt")
+print(cox_ARVs_co)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_ARVS <- cox.zph(cox_ARVS_co)
-ggcoxzph(cox_assumption_ARVS)
+schoenfield_ARVs <- ggcoxzph(cox_assumption_ARVS)
+ggsave("Output/survival analysis_uni_sc/schoenfield_ARVs.pdf", arrangeGrob(grobs=schoenfield_ARVs))
 ########################################
 spont_clearance_time_diabetes <- total_data %>% select(record_id,Time,Event,comorbidities___2)
 names(spont_clearance_time_diabetes)[4] <-"Diabetes"
 clean_spont_clearance_time_diabetes <- na.omit(spont_clearance_time_diabetes)
-ggsurvplot(survfit(Surv(Time,Event) ~ Diabetes,data=clean_spont_clearance_time_diabetes),
+diabetes_KMplot <- ggsurvplot(survfit(Surv(Time,Event) ~ Diabetes,data=clean_spont_clearance_time_diabetes),
            xlab="Days",
            ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           legend.title="Diabetes",
+           legend.labs=c("No Diabetes","Diabetes"),
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/Diabetes_KM.pdf",print(diabetes_KMplot),onefile=FALSE)
 cox_diabetes_co <-coxph(Surv(Time,Event)~Diabetes,data=clean_spont_clearance_time_diabetes)
-summary(cox_diabetes_co)
+sink("Output/survival analysis_uni_sc/cox_diabetes.txt")
+print(cox_diabetes_co)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_diabetes <- cox.zph(cox_diabetes_co)
-ggcoxzph(cox_assumption_diabetes)
+schoenfield_diabetes <- ggcoxzph(cox_assumption_diabetes)
+ggsave("Output/survival analysis_uni_sc/schoenfield_diabetes.pdf", arrangeGrob(grobs=schoenfield_diabetes))
 ########################################
 spont_clearance_time_immuno <- total_data %>% select(record_id,Time,Event,immuno)
 clean_spont_clearance_time_immuno <-na.omit(spont_clearance_time_immuno)
 immuno_given <-clean_spont_clearance_time_immuno %>% mutate(Immunotherapy=case_when(immuno == 1 ~"Yes", TRUE~"No"))
 immuno_given <- immuno_given[,-4]
-ggsurvplot(survfit(Surv(Time,Event)~Immunotherapy,data=immuno_given),
+immuno_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Immunotherapy,data=immuno_given),
            xlab="Days",
            ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           legend.title="Immunotherapy",
+           legend.labs=c("Not given immuno.","Given immuno."),
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/Immunotherapy_KM.pdf",print(immuno_KMplot),onefile=FALSE)
 cox_immuno_co <-coxph(Surv(Time,Event)~Immunotherapy,data=immuno_given)
-summary(cox_immuno_co)
+sink("Output/survival analysis_uni_sc/cox_immunotherapy.txt")
+print(cox_immuno_co)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_immuno <- cox.zph(cox_immuno_co)
-ggcoxzph(cox_assumption_immuno)
+schoenfield_immuno <- ggcoxzph(cox_assumption_immuno)
+ggsave("Output/survival analysis_uni_sc/schoenfield_immuno.pdf", arrangeGrob(grobs=schoenfield_immuno))
 ########################################
 spont_clearance_time_cAb_HBV <- total_data %>% select(record_id,Time,Event,cab.factor)
 names(spont_clearance_time_cAb_HBV)[4]<-"Core_HBV_Ab"
 clean_spont_clearance_time_cAb_HBV <- na.omit(spont_clearance_time_cAb_HBV)
 clean_spont_clearance_time_cAb_HBV$Core_HBV_Ab <-relevel(factor(clean_spont_clearance_time_cAb_HBV$Core_HBV_Ab),ref = "Negative")
-ggsurvplot(survfit(Surv(Time,Event)~Core_HBV_Ab,data=clean_spont_clearance_time_cAb_HBV),
+cAb_HBV_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Core_HBV_Ab,data=clean_spont_clearance_time_cAb_HBV),
            xlab="Days",
            ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           legend.title="Core Ab HBV",
+           legend.labs=c("Negative","Positive"),
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/cAb_HBV_KM.pdf",print(cAb_HBV_KMplot),onefile=FALSE)
 cox_cAb_HBV_co <-coxph(Surv(Time,Event)~Core_HBV_Ab,data=clean_spont_clearance_time_cAb_HBV)
-summary(cox_cAb_HBV_co)
+sink("Output/survival analysis_uni_sc/cox_cAb_HBV.txt")
+print(cox_cAb_HBV_co)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_cAb_HBV <- cox.zph(cox_cAb_HBV_co)
-ggcoxzph(cox_assumption_cAb_HBV)
+schoenfield_cAb_HBV <- ggcoxzph(cox_assumption_cAb_HBV)
+ggsave("Output/survival analysis_uni_sc/schoenfield_immuno.pdf", arrangeGrob(grobs=schoenfield_immuno))
 ########################################
 #Incomplete dataset(PROBLEMATIC)
 spont_clearance_time_chronic_HBV <- total_data %>% select(record_id,Time,Event,hbvsag_pcr.factor)
