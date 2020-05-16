@@ -216,7 +216,7 @@ ARVs_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~ARVs,data=clean_spont_clearan
 ggsave(file="Output/survival analysis_uni_sc/ARVs_Use_KM.pdf",print(ARVs_KMplot),onefile=FALSE)
 cox_ARVS_co <-coxph(Surv(Time,Event)~ARVs,data=clean_spont_clearance_time_ARVS_HIV_pos)
 sink("Output/survival analysis_uni_sc/cox_ARVs_use.txt")
-print(cox_ARVs_co)
+print(cox_ARVS_co)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_ARVS <- cox.zph(cox_ARVS_co)
@@ -505,8 +505,6 @@ schoenfield_il28b <- ggcoxzph(cox_assumption_il28b_combined)
 ggsave("Output/survival analysis_uni_sc/schoenfield_il28b.pdf", arrangeGrob(grobs=schoenfield_il28b))
 ########################################
 #Making dataframe of all above variables including missing data for multivariable analysis
-
-#Not included are il28b(Still missing considerable data),CD4(HIV+ve),ARVS(HIV+ve)
 dataframe_list <- list(spont_clearance_time_gender,spont_clearance_time_age,spont_clearance_time_HIVstatus,
                        peakALT_ClinicalOutcome_binary,all_Drug_use,cocaine_use_co,meth_use_co,heroin_use_co,
                        clean_spont_clearance_time_diabetes,immuno_given,
@@ -516,16 +514,14 @@ dataframe_list <- list(spont_clearance_time_gender,spont_clearance_time_age,spon
                        spont_clearance_time_MSM_risk,clean_spont_clearance_time_weight,
                        combined_il28b,clean_spont_clearance_time_ARVS_HIV_pos,
                        clean_spont_clear_time_cd4)
-#Note ID 66 has two entries due to being dually infected
 
 #This will recursively merge dataframes from the list above
 multivariable_df <- Reduce(function(x,y) merge(x,y,all=TRUE),dataframe_list)
 
 #Look at how many missing values there are:
-#Not standardised yet for removing negative times currently.Awaiting Emmas response.
 sapply(multivariable_df, function(x) sum(is.na(x)))
 
-#Writing a csv file
-write.csv(multivariable_df,"multivariable_df.csv",row.names = FALSE)
+#Writing a csv file to data folder
+write.csv(multivariable_df,"data/multivariable_df.csv",row.names = FALSE)
 
 
