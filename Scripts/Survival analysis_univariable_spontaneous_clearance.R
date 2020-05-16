@@ -461,51 +461,50 @@ ggsave(file="Output/survival analysis_uni_sc/MSM_KM.pdf",print(MSM_KMplot),onefi
 summary(survfit(Surv(Time,Event)~MSM,data=spont_clearance_time_MSM_risk),times=182.5)
 summary(survfit(Surv(Time,Event)~MSM,data=spont_clearance_time_MSM_risk),times=365.25)
 cox_MSM_co <-coxph(Surv(Time,Event)~MSM,data=spont_clearance_time_MSM_risk)
-
+sink("Output/survival analysis_uni_sc/MSM.txt")
+print(cox_MSM_co)
+sink(file=NULL)
 #Proportional hazards assumption
-cox_assumption_MSM <-cox.zph(cox_MSM_co)
-ggcoxzph(cox_assumption_MSM)
+cox_assumption_MSM <- cox.zph(cox_MSM_co)
+schoenfield_MSM <- ggcoxzph(cox_assumption_MSM)
+ggsave("Output/survival analysis_uni_sc/schoenfield_MSM.pdf", arrangeGrob(grobs=schoenfield_MSM))
 ########################################
 spont_clearance_time_weight <-total_data %>% select(record_id,weight,Event,Time)
 clean_spont_clearance_time_weight <-na.omit(spont_clearance_time_weight)
 cox_weight_co <- coxph(Surv(Time,Event)~weight,data=clean_spont_clearance_time_weight)
-summary(cox_weight_co)
+sink("Output/survival analysis_uni_sc/Weight.txt")
+print(cox_weight_co)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_weight <-cox.zph(cox_weight_co)
-ggcoxzph(cox_assumption_weight)
+schoenfield_weight <- ggcoxzph(cox_assumption_weight)
+ggsave("Output/survival analysis_uni_sc/schoenfield_weight.pdf", arrangeGrob(grobs=schoenfield_weight))
 ########################################
-#n=111
 spont_clearance_time_il28b <- total_data %>% select(record_id,ifnl4_860.factor,Event,Time)
 names(spont_clearance_time_il28b)[2]<-"il28b"
 clean_spont_clearance_time_il28b <-na.omit(spont_clearance_time_il28b)
-ggsurvplot(survfit(Surv(Time,Event)~il28b,data=clean_spont_clearance_time_il28b),
-           xlab="Days",
-           ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
-           pval = TRUE,
-           conf.int = TRUE)
-cox_il28b_co <-coxph(Surv(Time,Event)~il28b,data=clean_spont_clearance_time_il28b)
-summary(cox_il28b_co)
-#Proportional hazards assumption
-cox_assumption_il28b <-cox.zph(cox_il28b_co)
-ggcoxzph(cox_assumption_il28b)
-#Combined non-favourable
+#Combined non-favourable(CT/TT)
 combined_il28b <- clean_spont_clearance_time_il28b %>%mutate(CC_NonCC=case_when(il28b == 'CC' ~ 'CC',TRUE ~"CT/TT"))
 combined_il28b <- combined_il28b[,-2]
 combined_il28b$CC_NonCC <- relevel(factor(combined_il28b$CC_NonCC),ref='CT/TT')
-ggsurvplot(survfit(Surv(Time,Event)~CC_NonCC,data=combined_il28b),
+il28b_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~CC_NonCC,data=combined_il28b),
            xlab="Days",
-          ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           ylab="Proportion of HCV persistence",
+           legend.title="IL28B",
+           legend.labs=c("CT/TT","CC"),          
            pval = TRUE,
-         conf.int = TRUE)
+           conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/IL28B_KM.pdf",print(il28b_KMplot),onefile=FALSE)
 cox_il28b_co_combined <-coxph(Surv(Time,Event)~CC_NonCC,data=combined_il28b)
-summary(cox_il28b_co_combined)
+sink("Output/survival analysis_uni_sc/il28b.txt")
+print(cox_il28b_co_combined)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_il28b_combined <-cox.zph(cox_il28b_co_combined)
-ggcoxzph(cox_assumption_il28b_combined)
+schoenfield_il28b <- ggcoxzph(cox_assumption_il28b_combined)
+ggsave("Output/survival analysis_uni_sc/schoenfield_il28b.pdf", arrangeGrob(grobs=schoenfield_il28b))
 ########################################
-#Making dataframe of all above variables including missing data for multivariable analysis(IN PROGRESS)
+#Making dataframe of all above variables including missing data for multivariable analysis
 
 #Not included are il28b(Still missing considerable data),CD4(HIV+ve),ARVS(HIV+ve)
 dataframe_list <- list(spont_clearance_time_gender,spont_clearance_time_age,spont_clearance_time_HIVstatus,
