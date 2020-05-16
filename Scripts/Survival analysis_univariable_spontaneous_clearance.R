@@ -344,6 +344,7 @@ b_viral_load_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Viral_load,data=b_vir
            legend.labs=c("low(<8x10^5)","high(>8x10^5)"),
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/basline_viral_load_KM.pdf",print(b_viral_load_KMplot),onefile=FALSE)
 cox_baseline_viral_load_binary <- coxph(Surv(Time,Event)~Viral_load,data=b_viral_load_remove_number)
 sink("Output/survival analysis_uni_sc/cox_viral_load.txt")
 print(cox_baseline_viral_load_binary)
@@ -369,75 +370,98 @@ genotype_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Genotype,data=patients_ge
            legend.title="Infected Genotype",
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/Infected_Genotype_KM.pdf",print(genotype_KMplot),onefile=FALSE)
 cox_genotype_co <-coxph(Surv(Time,Event)~Genotype,data=patients_genotyped)
-summary(cox_genotype_co)
+sink("Output/survival analysis_uni_sc/cox_infected_genotype.txt")
+print(cox_genotype_co)
+sink(file=NULL)
 #Showing probability after 365 days
 summary(survfit(Surv(Time,Event)~Genotype,data=patients_genotyped),times=182.5)
 summary(survfit(Surv(Time,Event)~Genotype,data=patients_genotyped),times=365.25)
 #Proportional hazards assumption
 cox_assumption_genotype <-cox.zph(cox_genotype_co)
-ggcoxzph(cox_assumption_genotype)
+schoenfield_genotype <- ggcoxzph(cox_assumption_genotype)
+ggsave("Output/survival analysis_uni_sc/schoenfield_infected_genotype.pdf", arrangeGrob(grobs=schoenfield_genotype))
 ########################################
 spont_clearance_time_ethnicity <- total_data %>% select(record_id,Time,Event,ethnic.factor)
-ethnic_grouping <- spont_clearance_time_ethnicity %>% mutate(Ethnic_grouping=case_when(ethnic.factor =="White British"~"White British",
-                                                                                         ethnic.factor =="Any other White background" ~"Any other White background",
-                                                                                         TRUE ~ "Other ethnic background"))
+ethnic_grouping <- spont_clearance_time_ethnicity %>% 
+    mutate(Ethnic_grouping=case_when(ethnic.factor =="White British"~"White British",
+                                     ethnic.factor =="Any other White background" ~"Any other White background",
+                                     TRUE ~ "Other ethnic background"))
 ethnic_grouping <- ethnic_grouping[,-4]
 ethnic_grouping$Ethnic_grouping <- relevel(factor(ethnic_grouping$Ethnic_grouping),ref="White British")
-ggsurvplot(survfit(Surv(Time,Event)~Ethnic_grouping,data=ethnic_grouping),
+ethnicity_KMplot <-ggsurvplot(survfit(Surv(Time,Event)~Ethnic_grouping,data=ethnic_grouping),
            xlab="Days",
            ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           legend.title="Ethncity",
+           legend.labs=c("White British","Any Other White","Other Ethnic"),
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/ethnicity_KM.pdf",print(ethnicity_KMplot),onefile=FALSE)
 cox_ethnicity_co <-coxph(Surv(Time,Event)~Ethnic_grouping,data=ethnic_grouping)
-summary(cox_ethnicity_co)
+sink("Output/survival analysis_uni_sc/cox_ethnicity.txt")
+print(cox_ethnicity_co)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_ethnicity <- cox.zph(cox_ethnicity_co)
-ggcoxzph(cox_assumption_ethnicity)
+schoenfield_ethnicity <-ggcoxzph(cox_assumption_ethnicity)
+ggsave("Output/survival analysis_uni_sc/schoenfield_infected_genotype.pdf", arrangeGrob(grobs=schoenfield_ethnicity))
 ########################################
 spont_clearance_time_alcohol_excess <- total_data %>%select(record_id,Time,Event,alco_excess)
 clean_spont_clearance_time_alcohol_excess <- na.omit(spont_clearance_time_alcohol_excess)
-ggsurvplot(survfit(Surv(Time,Event)~alco_excess,data=clean_spont_clearance_time_alcohol_excess),
+alcohol_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~alco_excess,data=clean_spont_clearance_time_alcohol_excess),
            xlab="Days",
            ylab="Proportion of HCV persistence",
+           legend.title ="Alcohol excess",
+           legend.labs=c("No alcohol excess","Alcohol excess"),
            risk.table = TRUE,
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/Alcohol_excess_KM.pdf",print(alcohol_KMplot),onefile=FALSE)
 cox_alcohol_co <-coxph(Surv(Time,Event)~alco_excess,data=clean_spont_clearance_time_alcohol_excess)
-summary(cox_alcohol_co)
+sink("Output/survival analysis_uni_sc/alcohol_excess.txt")
+print(cox_alcohol_co)
+sink(file=NULL)
 #Proportional hazards assumption
-cox_assumption_alcohol <-cox.zph(cox_alcohol_co)
-ggcoxzph(cox_assumption_alcohol)
+cox_assumption_alcohol <- cox.zph(cox_alcohol_co)
+schoenfield_alcohol <- ggcoxzph(cox_assumption_alcohol)
+ggsave("Output/survival analysis_uni_sc/schoenfield_alcohol_excess.pdf", arrangeGrob(grobs=schoenfield_alcohol))
 ########################################
 spont_clearance_time_IDU <- total_data %>% select(record_id,Event,Time,risk___1)
 names(spont_clearance_time_IDU)[4]<-"PWID"
-ggsurvplot(survfit(Surv(Time,Event)~PWID,data=spont_clearance_time_IDU),
+IDU_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~PWID,data=spont_clearance_time_IDU),
            xlab="Days",
            ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           legend.title="PWID",
+           legend.labs=c("Not PWID","PWID"),
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/PWID_KM.pdf",print(IDU_KMplot),onefile=FALSE)
 cox_IDU_co <-coxph(Surv(Time,Event)~PWID,data=spont_clearance_time_IDU)
-summary(cox_IDU_co)
+sink("Output/survival analysis_uni_sc/PWID.txt")
+print(cox_IDU_co)
+sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_IDU <-cox.zph(cox_IDU_co)
-ggcoxzph(cox_assumption_IDU)
+schoenfield_IDU <- ggcoxzph(cox_assumption_IDU)
+ggsave("Output/survival analysis_uni_sc/schoenfield_PWID.pdf", arrangeGrob(grobs=schoenfield_IDU))
 ########################################
 spont_clearance_time_MSM <- total_data %>% select(record_id,risk___11,risk___10,risk___2,Event,Time)
 spont_clearance_time_MSM_risk <- spont_clearance_time_MSM %>% mutate(MSM=case_when(risk___11 ==1|risk___10 ==1|risk___2==1 ~ "1",TRUE ~ "0"))
 spont_clearance_time_MSM_risk <-spont_clearance_time_MSM_risk[c(1,5:7)]
 spont_clearance_time_MSM_risk$MSM <- relevel(factor(spont_clearance_time_MSM_risk$MSM),ref="1")
-ggsurvplot(survfit(Surv(Time,Event)~MSM,data=spont_clearance_time_MSM_risk),
+MSM_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~MSM,data=spont_clearance_time_MSM_risk),
            xlab="Days",
            ylab="Proportion of HCV persistence",
-           risk.table = TRUE,
+           legend.title="MSM",
+           legend.labs=c("Not MSM","MSM"),
            pval = TRUE,
            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/MSM_KM.pdf",print(MSM_KMplot),onefile=FALSE)
 summary(survfit(Surv(Time,Event)~MSM,data=spont_clearance_time_MSM_risk),times=182.5)
 summary(survfit(Surv(Time,Event)~MSM,data=spont_clearance_time_MSM_risk),times=365.25)
 cox_MSM_co <-coxph(Surv(Time,Event)~MSM,data=spont_clearance_time_MSM_risk)
-summary(cox_MSM_co)
+
 #Proportional hazards assumption
 cox_assumption_MSM <-cox.zph(cox_MSM_co)
 ggcoxzph(cox_assumption_MSM)
