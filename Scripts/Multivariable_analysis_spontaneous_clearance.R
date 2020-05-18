@@ -11,11 +11,6 @@ library(tidyr)
 #Dataframe which was created from Survivial analysis_v2.R
 data_mv <- read.csv("./data/multivariable_df.csv")
 
-#Remember P66 has been identified as being dually infected and thus has two lines.
-#Will be removed for downstream analysis
-#clean_data <- data %>%
-#    filter(record_id != 66)
-
 #STEP 1: PRIMARY ANALYSIS 
 #Include variables which were main remit of study
 #Use variables for which association is known
