@@ -12,79 +12,69 @@ library(tidyr)
 data_mv <- read.csv("./data/multivariable_df.csv")
 
 #STEP 1: PRIMARY ANALYSIS 
-#Include variables which were main remit of study
-#Use variables for which association is known
-# age, gender, HIV status,genotype, peak Bilirubin, peak ALT
-# Other ones that are known are PWID and MSM
-#Diversity is missing and IL28B
+#Remit of study: age, ?gender,genotype, HIV-status,peak Bilirubin, peakALT,diversity(missing)
+#Use variables(s) for which association is well known
+#PWID
 
 columns_to_convert_to_factor <- c("hiv","Diabetes","alco_excess","PWID","MSM","ARVs")
 data_mv[columns_to_convert_to_factor] <- lapply(data_mv[columns_to_convert_to_factor],factor)
 data_mv <- rename(data_mv,Gender=gender.factor)
+data_mv <-rename(data_mv,IL28B=CC_NonCC)
 data_mv$Gender <- relevel(data_mv$Gender,ref = "Male")
 data_mv$hiv <- relevel(data_mv$hiv,ref = "1")
 data_mv$MSM <- relevel(data_mv$MSM,ref = "1")
+data_mv$IL28B <- relevel(data_mv$IL28B,ref="CT/TT")
 
-multivariable_cox <- coxph(Surv(Time,Event)~age+Gender+hiv+peak_Bil_binary+Binary_peakALT+MSM+PWID+Genotype,data=data_mv)
-summary(multivariable_cox)
+multivariable_cox <- coxph(Surv(Time,Event)~age+Gender+hiv+peak_Bil_binary+Binary_peakALT+PWID+Genotype,data=data_mv)
+sink("Output/Multivariable_sc/all_variables_of_interest.txt")
+print(multivariable_cox)
+sink(file=NULL)
+
 #onefile=FALSE is used to ensure first page not being blank
-pdf(file="Forest plot spontaneous clearance.pdf", onefile = FALSE)
+pdf(file="Output/Multivariable_sc/Forest_plot_sc_all_variables.pdf", onefile = FALSE)
 #Forest plot to summarise data
-ggforest(multivariable_cox,data = data_mv)
+ggforest(multivariable_cox)
 dev.off()
 
-#Looking at missing data for spontaneous clearers currently
-missing_data_sc <- multivariable_df %>% filter(Event==1)
-sapply(missing_data_sc, function(x) sum(is.na(x)))
-#Ones of relevance are Genotype n=10 and Il28B n=12 which have missing data
-#Problem is that patients who spontaneously clear cannot be typed
+#Remove gender cause only 11 females
+multivariable_cox_remove_gender <-update(multivariable_cox,~.-Gender)
+sink("Output/Multivariable_sc/gender_removed.txt")
+print(multivariable_cox_remove_gender)
+sink(file=NULL)
+pdf(file="Output/Multivariable_sc/Forest_plot_excluded_gender.pdf",onefile = FALSE)
+ggforest(multivariable_cox_remove_gender)
+dev.off()
 
-#Remove gender
-multivariable_cox_remove_gender <- coxph(Surv(Time,Event)~age+hiv+peak_Bil_binary+Binary_peakALT+MSM+PWID+Genotype,data=data_mv)
-summary(multivariable_cox_remove_gender)
-ggforest(multivariable_cox_remove_gender,data=data_mv)
+#No difference in either model
+anova(multivariable_cox,multivariable_cox_remove_gender)
 
-#Remove gender and genotype
-multivariable_cox_remove_gender_genotype <- coxph(Surv(Time,Event)~age+hiv+peak_Bil_binary+Binary_peakALT+MSM+PWID,data=data_mv)
-summary(multivariable_cox_remove_gender_genotype)
-ggforest(multivariable_cox_remove_gender_genotype,data=data_mv)
+data_combine_genotype <- data_mv %>% 
+    mutate(Gt1_nonGt1=case_when(Genotype=="gt1a" ~ "gt1",TRUE~"non-gt1"))
+multivariable_cox_combine <- coxph(Surv(Time,Event)~age+Gender+hiv+peak_Bil_binary+Binary_peakALT+PWID+Gt1_nonGt1,data=data_combine_genotype)
+pdf(file="Output/Multivariable_sc/Forest_plot_combined_genotype.pdf",onefile = FALSE)
+ggforest(multivariable_cox_combine)
+dev.off()
 
-#Remove genotype
-multivariable_cox_remove_genotype <- coxph(Surv(Time,Event)~age+Gender+hiv+peak_Bil_binary+Binary_peakALT+MSM+PWID,data=data_mv)
-summary(multivariable_cox_remove_genotype)
-ggforest(multivariable_cox_remove_genotype,data=data_mv)
+multivariable_cox_combine_remove_gender <- update(multivariable_cox_combine,~.-Gender)
+summary(multivariable_cox_combine_remove_gender)
+pdf(file="Output/Multivariable_sc/Forest_plot_combined_genotype_remove_gender.pdf",onefile = FALSE)
+ggforest(multivariable_cox_combine_remove_gender)
+dev.off()
 
-#MSM and Genotype removed
-multivariable_cox_remove_MSM_Genotype <- coxph(Surv(Time,Event)~age+Gender+hiv+peak_Bil_binary+Binary_peakALT+PWID,data=data_mv)
-summary(multivariable_cox_remove_MSM_Genotype)
-ggforest(multivariable_cox_remove_MSM_Genotype,data=data_mv)
+#No difference in the two models
+anova(multivariable_cox_combine,multivariable_cox_combine_remove_gender)
 
-#MSM removed
-multivariable_cox_remove_MSM <- coxph(Surv(Time,Event)~age+Gender+hiv+peak_Bil_binary+Binary_peakALT+PWID+Genotype,data=data_mv)
-summary(multivariable_cox_remove_MSM_Genotype)
-ggforest(multivariable_cox_remove_MSM,data=data_mv)
+#Exploratory analysis
+#Not including gender(not possible with MSM) but including MSM and IL28B(note only 111 typed)
+multivariable_cox_exploratory <- update(multivariable_cox,~. -Gender+MSM+IL28B)
+multivariable_cox_exploratory_v2 <- update(multivariable_cox_combine,~. -Gender+MSM+IL28B)
 
-adding_column_both_risk_factors <- data_mv %>% 
-        mutate(MSM_PWID=case_when(MSM == 1 & PWID == 1 ~ "Both_risk",TRUE~"One_risk")) %>%
-            filter(MSM_PWID=="One_risk")
-
-#Removed both risk factors together
-cox_removed_both_risk_factors <- coxph(Surv(Time,Event)~age+Gender+hiv+peak_Bil_binary+Binary_peakALT+MSM+PWID+Genotype,data=adding_column_both_risk_factors)
-ggforest(cox_removed_both_risk_factors,data=adding_column_both_risk_factors)
-cox_removed_both_risk_factors_genotype <- coxph(Surv(Time,Event)~age+Gender+hiv+peak_Bil_binary+Binary_peakALT+MSM+PWID,data=adding_column_both_risk_factors)
-ggforest(cox_removed_both_risk_factors_genotype,data=adding_column_both_risk_factors)
-
-#HIV postive patients with gender removed cause females are not able to be MSM(mutually exclusive)
-hiv_positive_patients <- data_mv %>% filter(hiv==1)
-sapply(hiv_positive_patients, function(x) sum(is.na(x)))
-multivariable_cox_hiv_positive <- coxph(Surv(Time,Event)~age+peak_Bil_binary+Binary_peakALT+MSM+PWID+Genotype+CD4_count+ARVs,data=hiv_positive_patients)
-summary(multivariable_cox_hiv_positive)
-ggforest(multivariable_cox_hiv_positive,data=hiv_positive_patients)
-
-#HIV positive patients with ARVs removed
-multivariable_cox_hiv_positive_arvs_removed <- coxph(Surv(Time,Event)~age+peak_Bil_binary+Binary_peakALT+MSM+PWID+Genotype+CD4_count,data=hiv_positive_patients)
-summary(multivariable_cox_hiv_positive_arvs_removed)
-ggforest(multivariable_cox_hiv_positive_arvs_removed,data=hiv_positive_patients)
+#Concordance index quantifies the level of model fit which could be used for predictions.
+#Briefly spoken, the -index can be interpreted as the probability that a patient with a 
+#small survival time is associated with a high value of a biomarker combination (and vice versa). 
+#Consequently, it measures the concordance between the rankings of the survival times and the biomarker 
+#values and therefore the ability of a biomarker to discriminate between patients with small survival times 
+#and patients with large survival times (Andreas Mayr. et al Plos One 2014)
 
 #DIAGNOSTICS
 proportional_assumption <- cox.zph(multivariable_cox)
