@@ -20,12 +20,14 @@ columns_to_convert_to_factor <- c("hiv","Diabetes","alco_excess","PWID","MSM","A
 data_mv[columns_to_convert_to_factor] <- lapply(data_mv[columns_to_convert_to_factor],factor)
 data_mv <- rename(data_mv,Gender=gender.factor)
 data_mv <-rename(data_mv,IL28B=CC_NonCC)
+data_mv<-rename(data_mv,PeakBilirubin=peak_Bil_binary)
+data_mv<-rename(data_mv,PeakALT=Binary_peakALT)
 data_mv$Gender <- relevel(data_mv$Gender,ref = "Male")
 data_mv$hiv <- relevel(data_mv$hiv,ref = "1")
 data_mv$MSM <- relevel(data_mv$MSM,ref = "1")
 data_mv$IL28B <- relevel(data_mv$IL28B,ref="CT/TT")
 
-multivariable_cox <- coxph(Surv(Time,Event)~age+Gender+hiv+peak_Bil_binary+Binary_peakALT+PWID+Genotype,data=data_mv)
+multivariable_cox <- coxph(Surv(Time,Event)~age+Gender+hiv+PeakBilirubin+PeakALT+PWID+Genotype,data=data_mv)
 sink("Output/Multivariable_sc/all_variables_of_interest.txt")
 print(multivariable_cox)
 sink(file=NULL)
@@ -48,26 +50,33 @@ dev.off()
 #No difference in either model
 anova(multivariable_cox,multivariable_cox_remove_gender)
 
+#Not currently being used
 data_combine_genotype <- data_mv %>% 
     mutate(Gt1_nonGt1=case_when(Genotype=="gt1a" ~ "gt1",TRUE~"non-gt1"))
 multivariable_cox_combine <- coxph(Surv(Time,Event)~age+Gender+hiv+peak_Bil_binary+Binary_peakALT+PWID+Gt1_nonGt1,data=data_combine_genotype)
 pdf(file="Output/Multivariable_sc/Forest_plot_combined_genotype.pdf",onefile = FALSE)
 ggforest(multivariable_cox_combine)
 dev.off()
-
 multivariable_cox_combine_remove_gender <- update(multivariable_cox_combine,~.-Gender)
 summary(multivariable_cox_combine_remove_gender)
 pdf(file="Output/Multivariable_sc/Forest_plot_combined_genotype_remove_gender.pdf",onefile = FALSE)
 ggforest(multivariable_cox_combine_remove_gender)
 dev.off()
-
 #No difference in the two models
 anova(multivariable_cox_combine,multivariable_cox_combine_remove_gender)
 
+
 #Exploratory analysis
-#Not including gender(not possible with MSM) but including MSM and IL28B(note only 111 typed)
-multivariable_cox_exploratory <- update(multivariable_cox,~. -Gender+MSM+IL28B)
-multivariable_cox_exploratory_v2 <- update(multivariable_cox_combine,~. -Gender+MSM+IL28B)
+#IL28B(note only 111 typed), Core_HBV_Ab, heroin,methamphetamine,cocaine usage
+#Also genotype removed cause patients who are able to clear are often not typeable and different drug usage
+multivariable_cox_exploratory<- update(multivariable_cox,~.
+                                       +Core_HBV_Ab+IL28B+Cocaine_use+Meth_use+Heroin_use-Genotype-PWID)
+sink("Output/Multivariable_sc/exploratory.txt")
+print(multivariable_cox_exploratory)
+sink(file=NULL)
+pdf(file="Output/Multivariable_sc/Forest_plot_exploratory.pdf",onefile = FALSE)
+ggforest(multivariable_cox_exploratory)
+dev.off()
 
 #Concordance index quantifies the level of model fit which could be used for predictions.
 #Briefly spoken, the -index can be interpreted as the probability that a patient with a 
@@ -77,10 +86,17 @@ multivariable_cox_exploratory_v2 <- update(multivariable_cox_combine,~. -Gender+
 #and patients with large survival times (Andreas Mayr. et al Plos One 2014)
 
 #DIAGNOSTICS
+#Proportional assumption
 proportional_assumption <- cox.zph(multivariable_cox)
-#Non-significant relationship between residuals and time are refuted by a significant relationship
-ggcoxzph(proportional_assumption)
-#None were significant
+sink("Output/Multivariable_sc/proportional assumption for all variables.txt")
+print(proportional_assumption)
+sink(file=NULL)
+
+proportional_assumption_exploratory <- cox.zph(multivariable_cox_exploratory)
+sink("Output/Multivariable_sc/proportional assumption for exploratory.txt")
+print(proportional_assumption_exploratory)
+sink(file=NULL)
+
 #NEED MORE THOROUGH ANALYSIS
 ggcoxdiagnostics(multivariable_cox,type="dfbeta",linear.predictions = FALSE,ggtheme = theme_bw())
 ggcoxdiagnostics(multivariable_cox,type="deviance",linear.predictions = FALSE,ggtheme=theme_bw())
