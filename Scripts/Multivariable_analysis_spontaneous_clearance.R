@@ -97,7 +97,7 @@ sink("Output/Multivariable_sc/proportional assumption for exploratory.txt")
 print(proportional_assumption_exploratory)
 sink(file=NULL)
 
-#NEED MORE THOROUGH ANALYSIS
+#NEED MORE THOROUGH ANALYSIS FOR BOTH VARIABLES(DO APPROPRIATE READING)
 ggcoxdiagnostics(multivariable_cox,type="dfbeta",linear.predictions = FALSE,ggtheme = theme_bw())
 ggcoxdiagnostics(multivariable_cox,type="deviance",linear.predictions = FALSE,ggtheme=theme_bw())
 #Testing non-linearity for continous variables(IN PROGRESS)
