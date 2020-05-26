@@ -513,6 +513,25 @@ logit_genotype_co <-summ(logit_genotype_clinical_outcome,exp=TRUE,digits = 4)
 sink("Output/univariable_sc/Infected_genotype_regression_summary.txt")
 print(logit_genotype_co)
 sink(file=NULL)
+
+#Combining the non-genotype 1s together
+data_combine_genotype <- patients_genotyped %>% 
+    mutate(Gt1_nonGt1=case_when(Genotype=="clinical_genotype___1" ~ "gt1",TRUE~"non-gt1"))
+data_combine_genotype <- data_combine_genotype[-2]
+pdf("Output/univariable_sc/combined_infected_genotype_sc.pdf")
+plot1 <- ggplot(data_combine_genotype,aes(sc, fill=Gt1_nonGt1))+geom_histogram(stat="count")
+plot2 <- histogram(~sc|Gt1_nonGt1, data=data_combine_genotype)
+grid.arrange(plot1,plot2,ncol=1)
+dev.off()
+table_combined_genotype <- table(data_combine_genotype)
+fisher_combined_genotype_co <-fisher.test(table_combined_genotype)$p.value
+fisher_combined_genotype_co <- round(fisher_combined_genotype_co,digits=4)
+#Odds ratio analysis
+logit_combined_genotype_clinical_outcome <-glm(sc ~ Gt1_nonGt1, data=data_combine_genotype,family="binomial")
+logit_combined_genotype_co <-summ(logit_combined_genotype_clinical_outcome,exp=TRUE,digits = 4)
+sink("Output/univariable_sc/Infected_combined_genotype_regression_summary.txt")
+print(logit_combined_genotype_co)
+sink(file=NULL)
 ###################################################
 diabetic_ClinicalOutcome <- data %>% select(comorbidities___2,sc,record_id)
 diabetic_ClinicalOutcome <- diabetic_ClinicalOutcome %>% 
