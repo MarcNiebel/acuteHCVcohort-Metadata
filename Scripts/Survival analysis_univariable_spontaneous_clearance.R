@@ -382,6 +382,22 @@ summary(survfit(Surv(Time,Event)~Genotype,data=patients_genotyped),times=365.25)
 cox_assumption_genotype <-cox.zph(cox_genotype_co)
 schoenfield_genotype <- ggcoxzph(cox_assumption_genotype)
 ggsave("Output/survival analysis_uni_sc/schoenfield_infected_genotype.pdf", arrangeGrob(grobs=schoenfield_genotype))
+#Combining data
+data_combine_genotype <- patients_genotyped %>% 
+    mutate(Gt1_nonGt1=case_when(Genotype=="gt1a" ~ "gt1",TRUE~"non-gt1"))
+data_combine_genotype <- data_combine_genotype[-4]
+combined_genotype_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Gt1_nonGt1,data=data_combine_genotype),
+           xlab="Days",
+           ylab="Proportion of HCV persistence",
+           legend.title="Infected Genotype",
+           pval = TRUE,
+           conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/Combined_infected_Genotype_KM.pdf",print(combined_genotype_KMplot),onefile=FALSE)
+cox_combined_genotype_co <-coxph(Surv(Time,Event)~Gt1_nonGt1,data=data_combine_genotype)
+sink("Output/survival analysis_uni_sc/cox_infected_combined_genotype.txt")
+print(cox_combined_genotype_co)
+sink(file=NULL)
+
 ########################################
 spont_clearance_time_ethnicity <- total_data %>% select(record_id,Time,Event,ethnic.factor)
 ethnic_grouping <- spont_clearance_time_ethnicity %>% 
