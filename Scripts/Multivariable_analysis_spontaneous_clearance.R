@@ -7,6 +7,8 @@ library(survminer)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+library(lattice)
+library(jtools)
 
 #Dataframe which was created from Survivial analysis_v2.R
 data_mv <- read.csv("./data/multivariable_df.csv")
@@ -86,7 +88,9 @@ dev.off()
 #and patients with large survival times (Andreas Mayr. et al Plos One 2014)
 
 #DIAGNOSTICS
-#Proportional assumption
+#Proportional assumption: It is that the ratio of the hazard is constant over time. Can be assessed by
+#cross-over in KM plots or Schoenfeld residuals using cox.zph(). Looking for independence of residuals
+#time and variates
 proportional_assumption <- cox.zph(multivariable_cox)
 sink("Output/Multivariable_sc/proportional assumption for all variables.txt")
 print(proportional_assumption)
@@ -97,12 +101,40 @@ sink("Output/Multivariable_sc/proportional assumption for exploratory.txt")
 print(proportional_assumption_exploratory)
 sink(file=NULL)
 
-#NEED MORE THOROUGH ANALYSIS FOR BOTH VARIABLES(DO APPROPRIATE READING)
-ggcoxdiagnostics(multivariable_cox,type="dfbeta",linear.predictions = FALSE,ggtheme = theme_bw())
-ggcoxdiagnostics(multivariable_cox,type="deviance",linear.predictions = FALSE,ggtheme=theme_bw())
-#Testing non-linearity for continous variables(IN PROGRESS)
-
-
-
+#Testing influential observiations (dfbeta and deviance residuals)
+#dfbeta plots the estimate change in the regression coefficient if each observation is deleted in turn
+dfbeta_output <- ggcoxdiagnostics(multivariable_cox,type="dfbeta",linear.predictions = FALSE,ggtheme=theme_bw())
+ggsave(file="Output/Multivariable_sc/dfbeta_multivariable.pdf",print(dfbeta_output),onefile=FALSE)
+#Not the case
+#Check for outliers using deviance residuals(normalised transofrm of the martingdale residuals).
+#Roughly symmetrical around 0 is desired
+deviance_output <- ggcoxdiagnostics(multivariable_cox,type="deviance",linear.predictions = FALSE,ggtheme=theme_bw())
+ggsave(file="Output/Multivariable_sc/deviance_multivariable.pdf",print(deviance_output),onefile=FALSE)
+#Testing non-linearity for continous variable(age)
+#Should be linear to satisfy the cox proportional hazards model assumption
+non_linearity <-ggcoxfunctional(Surv(Time,Event)~age+log(age)+sqrt(age),data=data_mv)
+#Not in this case. Will need to make it a categorical variable
+#Ranges to seperate the ages equally 
+#cut_number(data_mv$age,3)
+#Three groups 21-35,35-43,43-70
+assign_age_group <- data_mv %>% 
+    mutate(Group_Age=case_when(age < 35 ~"<35",
+                               age > 43 ~">43",
+                               TRUE ~"35-43"))
+Grouped_Age_ClinicalOutcome <- assign_age_group %>% select(Group_Age,Event)
+Grouped_Age_ClinicalOutcome$Event <- factor(Grouped_Age_ClinicalOutcome$Event)
+#pdf()
+plot1 <- ggplot(Grouped_Age_ClinicalOutcome,aes(Event, fill=Group_Age))+geom_histogram(stat="count")
+plot2 <- histogram(~Event| Group_Age, data=Grouped_Age_ClinicalOutcome)
+table_group_age <- table(Grouped_Age_ClinicalOutcome)
+#Statistics
+fisher_age_group_co <- fisher.test(table_group_age)$p.value
+fisher_age_group_co <- round(fisher_age_group_co,digits = 4)
+#Odds ratio analysis
+Grouped_Age_ClinicalOutcome$Group_Age <-relevel(factor(Grouped_Age_ClinicalOutcome$Group_Age),ref="<35")
+logit_grouped_age_clinicaloutcome <-glm(Event ~ Group_Age, data=Grouped_Age_ClinicalOutcome,family="binomial")
+logit_grouped_age_co <- summ(logit_grouped_age_clinicaloutcome,exp=TRUE,digits=4)
+sink()
+#Do univariable analysis(sc)
 
 
