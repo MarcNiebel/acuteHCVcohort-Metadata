@@ -34,9 +34,10 @@ ggsave(file="Output/survival analysis_uni_sc/gender_KM.pdf",print(gender_KMplot)
 #Looking at how this has changed at specific points in time
 summary(survfit(Surv(Time,Event)~gender.factor,data=spont_clearance_time_gender),times=182.5)
 summary(survfit(Surv(Time,Event)~gender.factor,data=spont_clearance_time_gender),times=365.25)
-cox_gender_co <-summary(coxph(Surv(Time,Event)~gender.factor,data=spont_clearance_time_gender))
+cox_gender_co <-coxph(Surv(Time,Event)~gender.factor,data=spont_clearance_time_gender)
+cox_gender_co_output <- summary(cox_gender_co)
 sink("Output/survival analysis_uni_sc/cox_gender.txt")
-print(cox_gender_co)
+print(cox_gender_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_gender <- cox.zph(cox_gender_co)
@@ -58,9 +59,10 @@ age_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Group_Age,data=assign_age_grou
                             pval = TRUE,
                             conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/grouped_Age_KM.pdf",print(age_KMplot),onefile=FALSE)
-cox_age_co <-summary(coxph(Surv(Time,Event)~Group_Age,data=assign_age_group))
+cox_age_co <-coxph(Surv(Time,Event)~Group_Age,data=assign_age_group)
+cox_age_co_output <-summary(cox_age_co)
 sink("Output/survival analysis_uni_sc/cox_age.txt")
-print(cox_age_co)
+print(cox_age_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_age <- cox.zph(cox_age_co)
@@ -79,9 +81,10 @@ age_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~hiv,data=spont_clearance_time_
 ggsave(file="Output/survival analysis_uni_sc/age_KM.pdf",print(age_KMplot),onefile=FALSE)
 summary(survfit(Surv(Time,Event)~hiv,data=spont_clearance_time_HIVstatus),times=182.5)
 summary(survfit(Surv(Time,Event)~hiv,data=spont_clearance_time_HIVstatus),times=365.25)
-cox_hiv_co <- summary(coxph(Surv(Time,Event)~hiv,data=spont_clearance_time_HIVstatus))
+cox_hiv_co <- coxph(Surv(Time,Event)~hiv,data=spont_clearance_time_HIVstatus)
+cox_hiv_co_output <- summary(cox_hiv_co)
 sink("Output/survival analysis_uni_sc/cox_hiv.txt")
-print(cox_hiv_co)
+print(cox_hiv_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_hiv <- cox.zph(cox_hiv_co)
@@ -100,9 +103,10 @@ peakALT_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Binary_peakALT,data=peakAL
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/peakALT_KM.pdf",print(peakALT_KMplot),onefile=FALSE)
-cox_peakALT_co <-summary(coxph(Surv(Time,Event)~Binary_peakALT,data=peakALT_ClinicalOutcome_binary))
+cox_peakALT_co <-coxph(Surv(Time,Event)~Binary_peakALT,data=peakALT_ClinicalOutcome_binary)
+cox_peakALT_co_output <- summary(cox_peakALT_co)
 sink("Output/survival analysis_uni_sc/cox_peakALT.txt")
-print(cox_peakALT_co)
+print(cox_peakALT_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_peakALT <-cox.zph(cox_peakALT_co)
@@ -133,9 +137,10 @@ druguse_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Drug_use,data=all_Drug_use
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/Drug_Use_KM.pdf",print(druguse_KMplot),onefile=FALSE)
-cox_drug_use_co <- summary(coxph(Surv(Time,Event)~Drug_use,data=all_Drug_use))
+cox_drug_use_co <- coxph(Surv(Time,Event)~Drug_use,data=all_Drug_use)
+cox_drug_use_co_output <- summary(cox_drug_use_co)                      
 sink("Output/survival analysis_uni_sc/cox_drug_use.txt")
-print(cox_drug_use_co)
+print(cox_drug_use_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_druguse <- cox.zph(cox_drug_use_co)
@@ -158,9 +163,10 @@ cocaineuse_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Cocaine_use,data=cocain
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/Cocaine_Use_KM.pdf",print(cocaineuse_KMplot),onefile=FALSE)
-cox_cocaine_co <-summary(coxph(Surv(Time,Event)~Cocaine_use,data=cocaine_use_co))
+cox_cocaine_co <-coxph(Surv(Time,Event)~Cocaine_use,data=cocaine_use_co)
+cox_cocaine_co_output <-summary(cox_cocaine_co)
 sink("Output/survival analysis_uni_sc/cox_cocaine_use.txt")
-print(cox_cocaine_co)
+print(cox_cocaine_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_cocaine <-cox.zph(cox_cocaine_co)
@@ -181,9 +187,10 @@ methuse_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Meth_use,data=meth_use_co)
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/Meth_Use_KM.pdf",print(methuse_KMplot),onefile=FALSE)
-cox_meth_co <-summary(coxph(Surv(Time,Event)~Meth_use,data=meth_use_co))
+cox_meth_co <-coxph(Surv(Time,Event)~Meth_use,data=meth_use_co)
+cox_meth_co_output <- summary(cox_meth_co)
 sink("Output/survival analysis_uni_sc/cox_meth_use.txt")
-print(cox_meth_co)
+print(cox_meth_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_methuse <- cox.zph(cox_meth_co)
@@ -204,9 +211,10 @@ heroinuse_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Heroin_use,data=heroin_u
 ggsave(file="Output/survival analysis_uni_sc/Heroin_Use_KM.pdf",print(heroinuse_KMplot),onefile=FALSE)
 summary(survfit(Surv(Time,Event)~Heroin_use,data=heroin_use_co),times=182.5)
 summary(survfit(Surv(Time,Event)~Heroin_use,data=heroin_use_co),times=365.25)
-cox_heroin_co <-summary(coxph(Surv(Time,Event)~Heroin_use,data=heroin_use_co))
+cox_heroin_co <-coxph(Surv(Time,Event)~Heroin_use,data=heroin_use_co)
+cox_heroin_co_output <- summary(cox_heroin_co)
 sink("Output/survival analysis_uni_sc/cox_heroin_use.txt")
-print(cox_heroin_co)
+print(cox_heroin_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_heroin <-cox.zph(cox_heroin_co)
@@ -228,9 +236,10 @@ ARVs_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~ARVs,data=clean_spont_clearan
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/ARVs_Use_KM.pdf",print(ARVs_KMplot),onefile=FALSE)
-cox_ARVS_co <-summary(coxph(Surv(Time,Event)~ARVs,data=clean_spont_clearance_time_ARVS_HIV_pos))
+cox_ARVS_co <-coxph(Surv(Time,Event)~ARVs,data=clean_spont_clearance_time_ARVS_HIV_pos)
+cox_ARVS_co_output <- summary(cox_ARVS_co)
 sink("Output/survival analysis_uni_sc/cox_ARVs_use.txt")
-print(cox_ARVS_co)
+print(cox_ARVS_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_ARVS <- cox.zph(cox_ARVS_co)
@@ -248,9 +257,10 @@ diabetes_KMplot <- ggsurvplot(survfit(Surv(Time,Event) ~ Diabetes,data=clean_spo
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/Diabetes_KM.pdf",print(diabetes_KMplot),onefile=FALSE)
-cox_diabetes_co <-summary(coxph(Surv(Time,Event)~Diabetes,data=clean_spont_clearance_time_diabetes))
+cox_diabetes_co <-coxph(Surv(Time,Event)~Diabetes,data=clean_spont_clearance_time_diabetes)
+cox_diabetes_co_output <- summary(cox_diabetes_co)
 sink("Output/survival analysis_uni_sc/cox_diabetes.txt")
-print(cox_diabetes_co)
+print(cox_diabetes_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_diabetes <- cox.zph(cox_diabetes_co)
@@ -269,9 +279,10 @@ immuno_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Immunotherapy,data=immuno_g
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/Immunotherapy_KM.pdf",print(immuno_KMplot),onefile=FALSE)
-cox_immuno_co <-summary(coxph(Surv(Time,Event)~Immunotherapy,data=immuno_given))
+cox_immuno_co <-coxph(Surv(Time,Event)~Immunotherapy,data=immuno_given)
+cox_immuno_co_output <- summary(cox_immuno_co)
 sink("Output/survival analysis_uni_sc/cox_immunotherapy.txt")
-print(cox_immuno_co)
+print(cox_immuno_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_immuno <- cox.zph(cox_immuno_co)
@@ -290,9 +301,10 @@ cAb_HBV_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Core_HBV_Ab,data=clean_spo
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/cAb_HBV_KM.pdf",print(cAb_HBV_KMplot),onefile=FALSE)
-cox_cAb_HBV_co <-summary(coxph(Surv(Time,Event)~Core_HBV_Ab,data=clean_spont_clearance_time_cAb_HBV))
+cox_cAb_HBV_co <-coxph(Surv(Time,Event)~Core_HBV_Ab,data=clean_spont_clearance_time_cAb_HBV)
+cox_cAb_HBV_co_output <- summary(cox_cAb_HBV_co)
 sink("Output/survival analysis_uni_sc/cox_cAb_HBV.txt")
-print(cox_cAb_HBV_co)
+print(cox_cAb_HBV_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_cAb_HBV <- cox.zph(cox_cAb_HBV_co)
@@ -313,9 +325,10 @@ names(spont_clearance_time_CD4)[4]<-"CD4_count"
 spont_clearance_time_CD4_hiv_pos <- spont_clearance_time_CD4 %>% filter(hiv==1)
 spont_clearance_time_CD4_hiv_pos <- spont_clearance_time_CD4_hiv_pos[,-5]
 clean_spont_clear_time_cd4 <- na.omit(spont_clearance_time_CD4_hiv_pos)
-cox_CD4_co <-summary(coxph(Surv(Time,Event)~CD4_count,data=clean_spont_clear_time_cd4))
+cox_CD4_co <-coxph(Surv(Time,Event)~CD4_count,data=clean_spont_clear_time_cd4)
+cox_CD4_co_output <- summary(cox_CD4_co)
 sink("Output/survival analysis_uni_sc/cox_CD4.txt")
-print(cox_CD4_co)
+print(cox_CD4_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_CD4 <- cox.zph(cox_CD4_co)
@@ -336,9 +349,10 @@ peakBil_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~peak_Bil_binary,data=peakB
 ggsave(file="Output/survival analysis_uni_sc/peakBil_KM.pdf",print(peakBil_KMplot),onefile=FALSE)
 summary(survfit(Surv(Time,Event)~peak_Bil_binary,data=peakBil_binary),times=182.5)
 summary(survfit(Surv(Time,Event)~peak_Bil_binary,data=peakBil_binary),times=365.25)
-cox_peakBil_co <-summary(coxph(Surv(Time,Event)~peak_Bil_binary,data=peakBil_binary))
+cox_peakBil_co <-coxph(Surv(Time,Event)~peak_Bil_binary,data=peakBil_binary)
+cox_peakBil_co_output <- summary(cox_peakBil_co)
 sink("Output/survival analysis_uni_sc/cox_peakBilirubin.txt")
-print(cox_peakBil_co)
+print(cox_peakBil_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_peakBil <-cox.zph(cox_peakBil_co)
@@ -359,9 +373,10 @@ b_viral_load_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Viral_load,data=b_vir
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/basline_viral_load_KM.pdf",print(b_viral_load_KMplot),onefile=FALSE)
-cox_baseline_viral_load_binary <- summary(coxph(Surv(Time,Event)~Viral_load,data=b_viral_load_remove_number))
+cox_baseline_viral_load_binary <- coxph(Surv(Time,Event)~Viral_load,data=b_viral_load_remove_number)
+cox_baseline_viral_load_binary_output <- summary(cox_baseline_viral_load_binary)
 sink("Output/survival analysis_uni_sc/cox_viral_load.txt")
-print(cox_baseline_viral_load_binary)
+print(cox_baseline_viral_load_binary_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_b_viral_load <- cox.zph(cox_baseline_viral_load_binary)
@@ -385,9 +400,10 @@ genotype_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Genotype,data=patients_ge
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/Infected_Genotype_KM.pdf",print(genotype_KMplot),onefile=FALSE)
-cox_genotype_co <-summary(coxph(Surv(Time,Event)~Genotype,data=patients_genotyped))
+cox_genotype_co <-coxph(Surv(Time,Event)~Genotype,data=patients_genotyped)
+cox_genotype_co_output <- summary(cox_genotype_co)
 sink("Output/survival analysis_uni_sc/cox_infected_genotype.txt")
-print(cox_genotype_co)
+print(cox_genotype_co_output)
 sink(file=NULL)
 #Showing probability after 365 days
 summary(survfit(Surv(Time,Event)~Genotype,data=patients_genotyped),times=182.5)
@@ -407,9 +423,10 @@ combined_genotype_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Gt1_nonGt1,data=
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/Combined_infected_Genotype_KM.pdf",print(combined_genotype_KMplot),onefile=FALSE)
-cox_combined_genotype_co <-summary(coxph(Surv(Time,Event)~Gt1_nonGt1,data=data_combine_genotype))
+cox_combined_genotype_co <-coxph(Surv(Time,Event)~Gt1_nonGt1,data=data_combine_genotype)
+cox_combined_genotype_co_output <- summary(cox_combined_genotype_co)
 sink("Output/survival analysis_uni_sc/cox_infected_combined_genotype.txt")
-print(cox_combined_genotype_co)
+print(cox_combined_genotype_co_output)
 sink(file=NULL)
 
 ########################################
@@ -428,9 +445,10 @@ ethnicity_KMplot <-ggsurvplot(survfit(Surv(Time,Event)~Ethnic_grouping,data=ethn
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/ethnicity_KM.pdf",print(ethnicity_KMplot),onefile=FALSE)
-cox_ethnicity_co <-summary(coxph(Surv(Time,Event)~Ethnic_grouping,data=ethnic_grouping))
+cox_ethnicity_co <-coxph(Surv(Time,Event)~Ethnic_grouping,data=ethnic_grouping)
+cox_ethnicity_co_output <- summary(cox_ethnicity_co)
 sink("Output/survival analysis_uni_sc/cox_ethnicity.txt")
-print(cox_ethnicity_co)
+print(cox_ethnicity_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_ethnicity <- cox.zph(cox_ethnicity_co)
@@ -448,9 +466,10 @@ alcohol_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~alco_excess,data=clean_spo
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/Alcohol_excess_KM.pdf",print(alcohol_KMplot),onefile=FALSE)
-cox_alcohol_co <-summary(coxph(Surv(Time,Event)~alco_excess,data=clean_spont_clearance_time_alcohol_excess))
+cox_alcohol_co <-coxph(Surv(Time,Event)~alco_excess,data=clean_spont_clearance_time_alcohol_excess)
+cox_alcohol_co_output <- summary(cox_alcohol_co)
 sink("Output/survival analysis_uni_sc/alcohol_excess.txt")
-print(cox_alcohol_co)
+print(cox_alcohol_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_alcohol <- cox.zph(cox_alcohol_co)
@@ -467,9 +486,10 @@ IDU_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~PWID,data=spont_clearance_time
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/PWID_KM.pdf",print(IDU_KMplot),onefile=FALSE)
-cox_IDU_co <-summary(coxph(Surv(Time,Event)~PWID,data=spont_clearance_time_IDU))
+cox_IDU_co <-coxph(Surv(Time,Event)~PWID,data=spont_clearance_time_IDU)
+cox_IDU_co_output <- summary(cox_IDU_co)
 sink("Output/survival analysis_uni_sc/PWID.txt")
-print(cox_IDU_co)
+print(cox_IDU_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_IDU <-cox.zph(cox_IDU_co)
@@ -490,7 +510,8 @@ MSM_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~MSM,data=spont_clearance_time_
 ggsave(file="Output/survival analysis_uni_sc/MSM_KM.pdf",print(MSM_KMplot),onefile=FALSE)
 summary(survfit(Surv(Time,Event)~MSM,data=spont_clearance_time_MSM_risk),times=182.5)
 summary(survfit(Surv(Time,Event)~MSM,data=spont_clearance_time_MSM_risk),times=365.25)
-cox_MSM_co <-summary(coxph(Surv(Time,Event)~MSM,data=spont_clearance_time_MSM_risk))
+cox_MSM_co <-coxph(Surv(Time,Event)~MSM,data=spont_clearance_time_MSM_risk)
+cox_MSM_co_output <- summary(cox_MSM_co)
 sink("Output/survival analysis_uni_sc/MSM.txt")
 print(cox_MSM_co)
 sink(file=NULL)
@@ -501,9 +522,10 @@ ggsave("Output/survival analysis_uni_sc/schoenfield_MSM.pdf", arrangeGrob(grobs=
 ########################################
 spont_clearance_time_weight <-total_data %>% select(record_id,weight,Event,Time)
 clean_spont_clearance_time_weight <-na.omit(spont_clearance_time_weight)
-cox_weight_co <- summary(coxph(Surv(Time,Event)~weight,data=clean_spont_clearance_time_weight))
+cox_weight_co <- coxph(Surv(Time,Event)~weight,data=clean_spont_clearance_time_weight)
+cox_weight_co_output <- summary(cox_weight_co)
 sink("Output/survival analysis_uni_sc/Weight.txt")
-print(cox_weight_co)
+print(cox_weight_co_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_weight <-cox.zph(cox_weight_co)
@@ -525,9 +547,10 @@ il28b_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~CC_NonCC,data=combined_il28b
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/IL28B_KM.pdf",print(il28b_KMplot),onefile=FALSE)
-cox_il28b_co_combined <-summary(coxph(Surv(Time,Event)~CC_NonCC,data=combined_il28b))
+cox_il28b_co_combined <-coxph(Surv(Time,Event)~CC_NonCC,data=combined_il28b)
+cox_il28b_co_combined_output <- summary(cox_il28b_co_combined)
 sink("Output/survival analysis_uni_sc/il28b.txt")
-print(cox_il28b_co_combined)
+print(cox_il28b_co_combined_output)
 sink(file=NULL)
 #Proportional hazards assumption
 cox_assumption_il28b_combined <-cox.zph(cox_il28b_co_combined)
