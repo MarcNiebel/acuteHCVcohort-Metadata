@@ -43,8 +43,22 @@ cox_assumption_gender <- cox.zph(cox_gender_co)
 schoenfield_gender <- ggcoxzph(cox_assumption_gender)
 ggsave("Output/survival analysis_uni_sc/schoenfield_gender.pdf", arrangeGrob(grobs=schoenfield_gender))
 ########################################
+#Age as a categorical variable
 spont_clearance_time_age <- total_data %>% select(record_id,Time,Event,age)
-cox_age_co <-coxph(Surv(Time,Event)~age,data=spont_clearance_time_age)
+assign_age_group <- spont_clearance_time_age %>% 
+    mutate(Group_Age=case_when(age < 35 ~"<35",
+                               age > 43 ~">43",
+                               TRUE ~"35-43"))
+assign_age_group <- assign_age_group[,-4]
+assign_age_group$Group_Age <-factor(assign_age_group$Group_Age,levels = c("<35","35-43",">43"))
+age_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Group_Age,data=assign_age_group),
+                            xlab="Days",
+                            ylab="Proportion of HCV persistence",
+                            legend.title="Age",
+                            pval = TRUE,
+                            conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/grouped_Age_KM.pdf",print(age_KMplot),onefile=FALSE)
+cox_age_co <-coxph(Surv(Time,Event)~Group_Age,data=assign_age_group)
 sink("Output/survival analysis_uni_sc/cox_age.txt")
 print(cox_age_co)
 sink(file=NULL)
@@ -285,13 +299,13 @@ cox_assumption_cAb_HBV <- cox.zph(cox_cAb_HBV_co)
 schoenfield_cAb_HBV <- ggcoxzph(cox_assumption_cAb_HBV)
 ggsave("Output/survival analysis_uni_sc/schoenfield_cAb_HBV.pdf", arrangeGrob(grobs=schoenfield_cAb_HBV))
 ########################################
-#Incomplete dataset(PROBLEMATIC)
+#Incomplete dataset
 spont_clearance_time_chronic_HBV <- total_data %>% select(record_id,Time,Event,hbvsag_pcr.factor)
 names(spont_clearance_time_chronic_HBV)[4] <-"Chronic_HBV"
 clean_spont_clearance_time_chronic_HBV <- na.omit(spont_clearance_time_chronic_HBV)
 clean_spont_clearance_time_chronic_HBV$Chronic_HBV<- relevel(factor(clean_spont_clearance_time_chronic_HBV$Chronic_HBV),ref="Negative")
 table(clean_spont_clearance_time_chronic_HBV$Event,clean_spont_clearance_time_chronic_HBV$Chronic_HBV)
-#Neither KM or Cox Regression are done due
+#Neither KM or Cox Regression are done due to Os in table
 ########################################
 #HIV positive patients only
 spont_clearance_time_CD4 <- total_data %>% select(record_id,Time,Event,cd4_at_hcv_diagnosis,hiv)
@@ -529,7 +543,7 @@ dataframe_list <- list(spont_clearance_time_gender,spont_clearance_time_age,spon
                        spont_clearance_time_alcohol_excess,spont_clearance_time_IDU,
                        spont_clearance_time_MSM_risk,clean_spont_clearance_time_weight,
                        combined_il28b,clean_spont_clearance_time_ARVS_HIV_pos,
-                       clean_spont_clear_time_cd4)
+                       clean_spont_clear_time_cd4,assign_age_group)
 
 #This will recursively merge dataframes from the list above
 multivariable_df <- Reduce(function(x,y) merge(x,y,all=TRUE),dataframe_list)
