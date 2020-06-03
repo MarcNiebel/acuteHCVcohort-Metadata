@@ -57,6 +57,28 @@ logit_age_co <-summ(logit_age_clinicaloutcome,exp=TRUE,digits=4)
 sink("Output/univariable_sc/Age_regression_summary.txt")
 print(logit_age_co)
 sink(file=NULL)
+#Making the variable categorical due to assumption of non-linearity being fulfilled(violation)
+assign_age_group <- Age_ClinicalOutcome %>% 
+    mutate(Group_Age=case_when(age < 35 ~"<35",
+                               age > 43 ~">43",
+                               TRUE ~"35-43"))
+Grouped_Age_ClinicalOutcome <- assign_age_group %>% select(Group_Age,sc)
+pdf("Output/univariable_sc/Grouped_Age_sc.pdf")
+plot1 <- ggplot(Grouped_Age_ClinicalOutcome,aes(sc, fill=Group_Age))+geom_histogram(stat="count")
+plot2 <- histogram(~sc| Group_Age, data=Grouped_Age_ClinicalOutcome)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
+table_group_age <- table(Grouped_Age_ClinicalOutcome)
+#Statistics
+fisher_age_group_co <- fisher.test(table_group_age)$p.value
+fisher_age_group_co <- round(fisher_age_group_co,digits = 4)
+#Odds ratio analysis
+Grouped_Age_ClinicalOutcome$Group_Age <-relevel(factor(Grouped_Age_ClinicalOutcome$Group_Age),ref="<35")
+logit_grouped_age_clinicaloutcome <-glm(sc ~ Group_Age, data=Grouped_Age_ClinicalOutcome,family="binomial")
+logit_grouped_age_co <- summ(logit_grouped_age_clinicaloutcome,exp=TRUE,digits=4)
+sink("Output/univariable_sc/Grouped_age_regression_summary.txt")
+print(logit_grouped_age_co)
+sink(file=NULL)
 ###################################################
 Ethnicity_ClinicalOutcome <- data %>% select(ethnic.factor, sc,record_id)
 Ethnicity_ClinicalOutcome <-Ethnicity_ClinicalOutcome %>% 
@@ -650,7 +672,7 @@ stats_table <- data.frame(
                                      "peak ALT(>1000)","cAb HBV","chronic HBV","Drug use","Cocaine use","Methamphetamine use","Heroin use", 
                                      "baseline viral load(>800,000 IU/ml)","peak Bilirubin(>20)","Risk factor:PWID", 
                                      "Risk factor:MSM","Genotype","Diabetes","Alcohol excess","Weight","Immunotherapy","IL28B(CC vs CT/TT)"),
-                          p_value=c(fisher_go_co,wilcox_age_co,fisher_eth_group_co,fisher_hiv_co,wilcox_cd4_co,fisher_arvs_co,
+                          p_value=c(fisher_go_co,fisher_age_group_co,fisher_eth_group_co,fisher_hiv_co,wilcox_cd4_co,fisher_arvs_co,
                                     fisher_peakALT_binary_co,fisher_cAb_HBV_co,"NA",fisher_all_drug_use_co,fisher_cocaine_use_co,fisher_meth_co,
                                     fisher_heroin_co,fisher_b_viral_load_binary_co,fisher_peakBil_binary_co,fisher_IDU_co,fisher_MSM_co,
                                     fisher_genotype_co,fisher_diabetic_co,fisher_alcohol_excess_co,wilcox_weight_co,fisher_immuno_co, 
