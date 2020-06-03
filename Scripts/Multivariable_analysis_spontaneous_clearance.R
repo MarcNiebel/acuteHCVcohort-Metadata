@@ -35,7 +35,7 @@ data_mv$IL28B <- relevel(data_mv$IL28B,ref="CT/TT")
 
 #Changing the column entries to be more meaningful
 data_mv <- data_mv %>% mutate(hiv=recode(hiv,"0"="Negative","1"="Positive"))
-data_mv <- data_mv %>% mutate(PWID=recode(PWID,"O"="Negative","1" = "Positive"))
+data_mv <- data_mv %>% mutate(PWID=recode(PWID,"0"="No","1"="Yes"))
 
 multivariable_cox <- coxph(Surv(Time,Event)~Age+Gender+hiv+PeakBilirubin+PeakALT+PWID+Genotype,data=data_mv)
 sink("Output/Multivariable_sc/all_variables_of_interest.txt")
