@@ -14,7 +14,7 @@ library(jtools)
 data_mv <- read.csv("./data/multivariable_df.csv")
 
 #STEP 1: PRIMARY ANALYSIS 
-#Remit of study: age, ?gender,genotype, HIV-status,peak Bilirubin, peakALT,diversity(missing)
+#Remit of study: age, gender,genotype, HIV-status,peak Bilirubin, peakALT,diversity(missing)
 #Use variables(s) for which association is well known
 #PWID
 
@@ -23,13 +23,21 @@ data_mv[columns_to_convert_to_factor] <- lapply(data_mv[columns_to_convert_to_fa
 data_mv <- rename(data_mv,Gender=gender.factor)
 data_mv <-rename(data_mv,IL28B=CC_NonCC)
 data_mv<-rename(data_mv,PeakBilirubin=peak_Bil_binary)
+data_mv <-rename(data_mv,Age=Group_Age)
 data_mv<-rename(data_mv,PeakALT=Binary_peakALT)
+data_mv<-rename(data_mv,CocaineUse=Cocaine_use)
+data_mv<-rename(data_mv,MethamphetamineUse=Meth_use)
+data_mv<-rename(data_mv,HeroinUse=Heroin_use)
 data_mv$Gender <- relevel(data_mv$Gender,ref = "Male")
 data_mv$hiv <- relevel(data_mv$hiv,ref = "1")
 data_mv$MSM <- relevel(data_mv$MSM,ref = "1")
 data_mv$IL28B <- relevel(data_mv$IL28B,ref="CT/TT")
 
-multivariable_cox <- coxph(Surv(Time,Event)~age+Gender+hiv+PeakBilirubin+PeakALT+PWID+Genotype,data=data_mv)
+#Changing the column entries to be more meaningful
+data_mv <- data_mv %>% mutate(hiv=recode(hiv,"0"="Negative","1"="Positive"))
+data_mv <- data_mv %>% mutate(PWID=recode(PWID,"O"="Negative","1" = "Positive"))
+
+multivariable_cox <- coxph(Surv(Time,Event)~Age+Gender+hiv+PeakBilirubin+PeakALT+PWID+Genotype,data=data_mv)
 sink("Output/Multivariable_sc/all_variables_of_interest.txt")
 print(multivariable_cox)
 sink(file=NULL)
@@ -117,24 +125,6 @@ non_linearity <-ggcoxfunctional(Surv(Time,Event)~age+log(age)+sqrt(age),data=dat
 #Ranges to seperate the ages equally 
 #cut_number(data_mv$age,3)
 #Three groups 21-35,35-43,43-70
-assign_age_group <- data_mv %>% 
-    mutate(Group_Age=case_when(age < 35 ~"<35",
-                               age > 43 ~">43",
-                               TRUE ~"35-43"))
-Grouped_Age_ClinicalOutcome <- assign_age_group %>% select(Group_Age,Event)
-Grouped_Age_ClinicalOutcome$Event <- factor(Grouped_Age_ClinicalOutcome$Event)
-#pdf()
-plot1 <- ggplot(Grouped_Age_ClinicalOutcome,aes(Event, fill=Group_Age))+geom_histogram(stat="count")
-plot2 <- histogram(~Event| Group_Age, data=Grouped_Age_ClinicalOutcome)
-table_group_age <- table(Grouped_Age_ClinicalOutcome)
-#Statistics
-fisher_age_group_co <- fisher.test(table_group_age)$p.value
-fisher_age_group_co <- round(fisher_age_group_co,digits = 4)
-#Odds ratio analysis
-Grouped_Age_ClinicalOutcome$Group_Age <-relevel(factor(Grouped_Age_ClinicalOutcome$Group_Age),ref="<35")
-logit_grouped_age_clinicaloutcome <-glm(Event ~ Group_Age, data=Grouped_Age_ClinicalOutcome,family="binomial")
-logit_grouped_age_co <- summ(logit_grouped_age_clinicaloutcome,exp=TRUE,digits=4)
-sink()
-#Do univariable analysis(sc)
+
 
 
