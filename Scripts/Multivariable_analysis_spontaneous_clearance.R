@@ -95,7 +95,7 @@ dev.off()
 #values and therefore the ability of a biomarker to discriminate between patients with small survival times 
 #and patients with large survival times (Andreas Mayr. et al Plos One 2014)
 
-#DIAGNOSTICS
+#DIAGNOSTICS(WORK IN PROGRESS)
 #Proportional assumption: It is that the ratio of the hazard is constant over time. Can be assessed by
 #cross-over in KM plots or Schoenfeld residuals using cox.zph(). Looking for independence of residuals
 #time and variates
@@ -114,6 +114,8 @@ sink(file=NULL)
 dfbeta_output <- ggcoxdiagnostics(multivariable_cox,type="dfbeta",linear.predictions = FALSE,ggtheme=theme_bw())
 ggsave(file="Output/Multivariable_sc/dfbeta_multivariable.pdf",print(dfbeta_output),onefile=FALSE)
 #Not the case
+dfbeta_output_exploratory <- ggcoxdiagnostics(multivariable_cox_exploratory,type="dfbeta",linear.predictions = FALSE,ggtheme=theme_bw())
+ggsave(file="Output/Multivariable_sc/dfbeta_multivariable_exploratory.pdf",print(dfbeta_output),onefile=FALSE)
 #Check for outliers using deviance residuals(normalised transofrm of the martingdale residuals).
 #Roughly symmetrical around 0 is desired
 deviance_output <- ggcoxdiagnostics(multivariable_cox,type="deviance",linear.predictions = FALSE,ggtheme=theme_bw())
