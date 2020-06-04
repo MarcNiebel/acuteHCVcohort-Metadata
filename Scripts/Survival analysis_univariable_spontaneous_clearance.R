@@ -71,14 +71,15 @@ ggsave("Output/survival analysis_uni_sc/schoenfield_age.pdf", arrangeGrob(grobs=
 ########################################
 spont_clearance_time_HIVstatus <- total_data %>% select(record_id,Event,Time,hiv)
 spont_clearance_time_HIVstatus$hiv <- relevel(factor(spont_clearance_time_HIVstatus$hiv),ref="1")
-age_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~hiv,data=spont_clearance_time_HIVstatus),
+hiv_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~hiv,data=spont_clearance_time_HIVstatus),
            xlab="Days",
            ylab="Proportion of HCV persistence",
            legend.title="HIV Status",
-           legend.labs=c("HIV negative","HIV positive"),
+           risk.table=TRUE,
+           legend.labs=c("HIV positive","HIV negative"),
            pval = TRUE,
            conf.int = TRUE)
-ggsave(file="Output/survival analysis_uni_sc/age_KM.pdf",print(age_KMplot),onefile=FALSE)
+ggsave(file="Output/survival analysis_uni_sc/hiv_KM.pdf",print(hiv_KMplot),onefile=FALSE)
 summary(survfit(Surv(Time,Event)~hiv,data=spont_clearance_time_HIVstatus),times=182.5)
 summary(survfit(Surv(Time,Event)~hiv,data=spont_clearance_time_HIVstatus),times=365.25)
 cox_hiv_co <- coxph(Surv(Time,Event)~hiv,data=spont_clearance_time_HIVstatus)
@@ -205,7 +206,8 @@ heroinuse_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Heroin_use,data=heroin_u
            xlab="Days",
            ylab="Proportion of HCV persistence",
            legend.title="Heroin Use",
-           legend.labs=c("Heroin No Use", "Heroin Use"),
+           risk.table=TRUE,
+           legend.labs=c("No","Yes"),
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/Heroin_Use_KM.pdf",print(heroinuse_KMplot),onefile=FALSE)
@@ -345,6 +347,7 @@ peakBil_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~peak_Bil_binary,data=peakB
            legend.title="peak Bilirubin",
            legend.labs=c("peak Bilirubin < 20","peak Bilirubin > 20"),
            pval = TRUE,
+           risk.table = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/peakBil_KM.pdf",print(peakBil_KMplot),onefile=FALSE)
 summary(survfit(Surv(Time,Event)~peak_Bil_binary,data=peakBil_binary),times=182.5)
@@ -397,6 +400,7 @@ genotype_KMplot <- ggsurvplot(survfit(Surv(Time,Event)~Genotype,data=patients_ge
            xlab="Days",
            ylab="Proportion of HCV persistence",
            legend.title="Infected Genotype",
+           risk.table = TRUE,
            pval = TRUE,
            conf.int = TRUE)
 ggsave(file="Output/survival analysis_uni_sc/Infected_Genotype_KM.pdf",print(genotype_KMplot),onefile=FALSE)
