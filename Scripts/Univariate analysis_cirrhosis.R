@@ -58,6 +58,29 @@ logit_age_summ <- summ(logit_age_cirrhosis,exp=TRUE,digits=4)
 sink("Output/univariable_cirrhosis/Age_regression_summary.txt")
 print(logit_age_summ)
 sink(file=NULL)
+#Making the variable categorical due to assumption of non-linearity being fulfilled from
+#spontaneous clearance analysis
+assign_age_group_cirrhosis <- clean_Age_Cirrhosis %>% 
+    mutate(Group_Age=case_when(age < 35 ~"<35",
+                               age > 43 ~">43",
+                               TRUE ~"35-43"))
+Grouped_Age_cirrhosis <- assign_age_group_cirrhosis %>% select(Group_Age,cirrhosis)
+pdf("Output/univariable_cirrhosis/Grouped_Age_cirrhosis.pdf")
+plot1 <- ggplot(Grouped_Age_cirrhosis,aes(cirrhosis, fill=Group_Age))+geom_histogram(stat="count")
+plot2 <- histogram(~cirrhosis| Group_Age, data=Grouped_Age_cirrhosis)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
+table_group_age_cirrhosis <- table(Grouped_Age_cirrhosis)
+#Statistics
+fisher_age_group_cirrhosis <- fisher.test(table_group_age_cirrhosis)$p.value
+fisher_age_group_cirrhosis <- round(fisher_age_group_cirrhosis,digits = 4)
+#Odds ratio analysis
+Grouped_Age_cirrhosis$Group_Age <-relevel(factor(Grouped_Age_cirrhosis$Group_Age),ref="<35")
+logit_grouped_age_cirrhosis <-glm(cirrhosis ~ Group_Age, data=Grouped_Age_cirrhosis,family="binomial")
+logit_grouped_age_cirr <- summ(logit_grouped_age_cirrhosis,exp=TRUE,digits=4)
+sink("Output/univariable_cirrhosis/Grouped_age_regression_summary.txt")
+print(logit_grouped_age_cirr)
+sink(file=NULL)
 ###################################################
 HIV_Cirrhosis <- data %>% select(hiv.factor, cirrhosis,record_id)
 HIV_Cirrhosis <- HIV_Cirrhosis %>%
