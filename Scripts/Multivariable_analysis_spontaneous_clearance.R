@@ -75,7 +75,6 @@ dev.off()
 #No difference in the two models
 anova(multivariable_cox_combine,multivariable_cox_combine_remove_gender)
 
-
 #Exploratory analysis
 #IL28B(note only 111 typed), Core_HBV_Ab, heroin,methamphetamine,cocaine usage
 #Also genotype removed cause patients who are able to clear are often not typeable and different drug usage
@@ -86,6 +85,16 @@ print(multivariable_cox_exploratory)
 sink(file=NULL)
 pdf(file="Output/Multivariable_sc/Forest_plot_exploratory.pdf",onefile = FALSE)
 ggforest(multivariable_cox_exploratory)
+dev.off()
+
+#HIV positive patients can inlcude CD4 count and ARVs
+hiv_positive_patients <- data_mv %>% filter(hiv=="Positive")
+multivariable_cox_hiv_pos <- coxph(Surv(Time,Event)~Age+Gender+PeakBilirubin+PeakALT+PWID+Genotype+CD4_count+ARVs,data=hiv_positive_patients)
+sink("Output/Multivariable_sc/hiv_positive.txt")
+print(multivariable_cox_hiv_pos)
+sink(file=NULL)
+pdf(file="Output/Multivariable_sc/Forest_plot_hiv_positive.pdf",onefile = FALSE)
+ggforest(multivariable_cox_hiv_pos)
 dev.off()
 
 #Concordance index quantifies the level of model fit which could be used for predictions.
