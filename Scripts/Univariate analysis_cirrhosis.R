@@ -656,7 +656,7 @@ stats_table <- data.frame(
                                      "cAb HBV","chronic HBV","Drug use","Cocaine use","Methamphetamine use","Heroin use", "baseline viral load(>800,000 IU/ml)",
                                      "peak Bilirubin(>20)","Risk factor:PWID", "Risk factor:MSM","Genotype","Diabetes",
                                      "Alcohol excess","Weight","Immunotherapy","IL28B(CC vs CT/TT)"),
-                          p_value=c(fisher_g_cirrhosis,wilcox_age_cirrhosis,fisher_group_eth_cirrhosis,fisher_HIV_cirrhosis,wilcox_cd4_cirrhosis,
+                          p_value=c(fisher_g_cirrhosis,fisher_age_group_cirrhosis,fisher_group_eth_cirrhosis,fisher_HIV_cirrhosis,wilcox_cd4_cirrhosis,
                                     fisher_arvs_cirrhosis,fisher_peakALT_cirrhosis_binary,fisher_cAb_HBV_cirrhosis,fisher_chronic_HBV_cirrhosis,
                                     fisher_all_drug_use_cirrhosis,fisher_cocaine_cir,fisher_meth_cir,fisher_heroin_cir,
                                     fisher_b_viral_load_binary_cirrhosis,fisher_peakBil_binary_cirrhosis,fisher_IDU_cirrhosis,fisher_MSM_cir,
