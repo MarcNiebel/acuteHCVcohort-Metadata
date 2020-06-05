@@ -132,10 +132,12 @@ ggsave(file="Output/Multivariable_sc/deviance_multivariable.pdf",print(deviance_
 #Testing non-linearity for continous variable(age)
 #Should be linear to satisfy the cox proportional hazards model assumption
 non_linearity <-ggcoxfunctional(Surv(Time,Event)~age+log(age)+sqrt(age),data=data_mv)
+ggsave(file="Output/Multivariable_sc/non-linearity_age.pdf",print(non_linearity_age),onefile=FALSE)
 #Not in this case. Will need to make it a categorical variable
 #Ranges to seperate the ages equally 
 #cut_number(data_mv$age,3)
 #Three groups 21-35,35-43,43-70
-
-
+non_linearity_CD4 <-ggcoxfunctional(Surv(Time,Event)~CD4_count+log(CD4_count)+sqrt(CD4_count),data=na.omit(data_mv))
+ggsave(file="Output/Multivariable_sc/non-linearity_age.pdf",print(non_linearity_age),onefile=FALSE)
+#Not linear either so will need to use a cut-off
 
