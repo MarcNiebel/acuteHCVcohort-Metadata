@@ -163,7 +163,7 @@ sink("Output/univariable_sc/CD4_regression_summary.txt")
 print(logit_cd4_co)
 sink(file=NULL)
 #Making the variable categorical due to assumption of non-linearity being fulfilled(violation)
-assign_cd4_group <- CD4_ClinicalOutcome %>% 
+assign_cd4_group <- clean_CD4_ClinicalOutcome  %>% 
     mutate(Group_CD4=case_when(cd4_at_hcv_diagnosis < 200 ~"<200",
                                TRUE ~">=200"))
 Grouped_CD4_ClinicalOutcome <- assign_cd4_group %>% select(Group_CD4,sc)
