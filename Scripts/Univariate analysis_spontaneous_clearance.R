@@ -699,7 +699,7 @@ stats_table <- data.frame(
                                     fisher_heroin_co,fisher_b_viral_load_binary_co,fisher_peakBil_binary_co,fisher_IDU_co,fisher_MSM_co,
                                     fisher_genotype_co,fisher_diabetic_co,fisher_alcohol_excess_co,wilcox_weight_co,fisher_immuno_co, 
                                     fisher_combined_il28b_co))
-pdf(file="Output/univariable_sc/Assoications of variables with spontaneous clearance.pdf")
+pdf(file="Output/univariable_sc/Associations of variables with spontaneous clearance.pdf")
 grid.table(stats_table)
 dev.off()
 
