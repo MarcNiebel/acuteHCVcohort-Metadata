@@ -322,12 +322,25 @@ table(clean_spont_clearance_time_chronic_HBV$Event,clean_spont_clearance_time_ch
 #Neither KM or Cox Regression are done due to Os in table
 ########################################
 #HIV positive patients only
+#Categorical variable
 spont_clearance_time_CD4 <- total_data %>% select(record_id,Time,Event,cd4_at_hcv_diagnosis,hiv)
 names(spont_clearance_time_CD4)[4]<-"CD4_count"
 spont_clearance_time_CD4_hiv_pos <- spont_clearance_time_CD4 %>% filter(hiv==1)
 spont_clearance_time_CD4_hiv_pos <- spont_clearance_time_CD4_hiv_pos[,-5]
 clean_spont_clear_time_cd4 <- na.omit(spont_clearance_time_CD4_hiv_pos)
-cox_CD4_co <-coxph(Surv(Time,Event)~CD4_count,data=clean_spont_clear_time_cd4)
+assign_category_cd4 <- clean_spont_clear_time_cd4 %>%
+    mutate(Group_CD4=case_when(CD4_count <200 ~"<200",TRUE ~">=200"))
+assign_category_cd4 <- assign_category_cd4[-4]
+assign_category_cd4$Group_CD4 <- relevel(factor(assign_category_cd4$Group_CD4),ref=">=200")
+cd4_KMplot <-ggsurvplot(survfit(Surv(Time,Event)~Group_CD4,data=assign_category_cd4),
+                        xlab="Days",
+                        ylab="Proportion of HCV persistence",
+                        legend.title="CD4 count",
+                        pval = TRUE,
+                        legend.labs=c("CD4 >=200","CD4 <200"),
+                        conf.int = TRUE)
+ggsave(file="Output/survival analysis_uni_sc/CD4_KM.pdf",print(cd4_KMplot),onefile=FALSE)
+cox_CD4_co <-coxph(Surv(Time,Event)~Group_CD4,data=assign_category_cd4)
 cox_CD4_co_output <- summary(cox_CD4_co)
 sink("Output/survival analysis_uni_sc/cox_CD4.txt")
 print(cox_CD4_co_output)
