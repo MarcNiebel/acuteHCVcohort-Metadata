@@ -583,7 +583,7 @@ dataframe_list <- list(spont_clearance_time_gender,spont_clearance_time_age,spon
                        spont_clearance_time_alcohol_excess,spont_clearance_time_IDU,
                        spont_clearance_time_MSM_risk,clean_spont_clearance_time_weight,
                        combined_il28b,clean_spont_clearance_time_ARVS_HIV_pos,
-                       clean_spont_clear_time_cd4,assign_age_group)
+                       clean_spont_clear_time_cd4,assign_age_group,assign_category_cd4)
 
 #This will recursively merge dataframes from the list above
 multivariable_df <- Reduce(function(x,y) merge(x,y,all=TRUE),dataframe_list)
