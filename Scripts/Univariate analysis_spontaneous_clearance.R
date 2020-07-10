@@ -162,6 +162,28 @@ logit_cd4_co <- summ(logit_CD4_clinicaloutcome,exp=TRUE,digits = 4)
 sink("Output/univariable_sc/CD4_regression_summary.txt")
 print(logit_cd4_co)
 sink(file=NULL)
+#Making the variable categorical due to assumption of non-linearity being fulfilled(violation)
+assign_cd4_group <- CD4_ClinicalOutcome %>% 
+    mutate(Group_CD4=case_when(cd4_at_hcv_diagnosis < 200 ~"<200",
+                               TRUE ~">=200"))
+Grouped_CD4_ClinicalOutcome <- assign_cd4_group %>% select(Group_CD4,sc)
+Grouped_CD4_ClinicalOutcome$sc <- factor(Grouped_CD4_ClinicalOutcome$sc)
+pdf("Output/univariable_sc/Grouped_cd4_sc.pdf")
+plot1 <- ggplot(Grouped_CD4_ClinicalOutcome,aes(sc, fill=Group_CD4))+geom_histogram(stat="count")
+plot2 <- histogram(~sc| Group_CD4, data=Grouped_CD4_ClinicalOutcome)
+grid.arrange(plot1,plot2,nrow=1)
+dev.off()
+table_group_CD4 <- table(Grouped_CD4_ClinicalOutcome)
+#Statistics
+fisher_CD4_group_co <- fisher.test(table_group_CD4)$p.value
+fisher_CD4_group_co <- round(fisher_CD4_group_co,digits = 4)
+#Odds ratio analysis
+Grouped_CD4_ClinicalOutcome$Group_CD4 <-relevel(factor(Grouped_CD4_ClinicalOutcome$Group_CD4),ref=">=200")
+logit_grouped_cd4_clinicaloutcome <-glm(sc ~ Group_CD4, data=Grouped_CD4_ClinicalOutcome,family="binomial")
+logit_grouped_cd4_co <- summ(logit_grouped_cd4_clinicaloutcome,exp=TRUE,digits=4)
+sink("Output/univariable_sc/Grouped_cd4_regression_summary.txt")
+print(logit_grouped_cd4_co)
+sink(file=NULL)
 ###################################################
 peakALT_ClinicalOutcome <- data %>% select(alt_peak,sc,record_id)
 peakALT_ClinicalOutcome <- peakALT_ClinicalOutcome %>% 
@@ -668,11 +690,11 @@ print(logit_weight_co)
 sink(file=NULL)
 ##################################################
 stats_table <- data.frame(
-    Variable=c("Gender","Age","Ethnicity","HIV status","CD4(HIV +ve patients only)","ARVS(HIV+ve patients only)",
+    Variable=c("Gender","Age","Ethnicity","HIV status","CD4(HIV +ve patients only;<200 cells/mm3)","ARVS(HIV+ve patients only)",
                                      "peak ALT(>1000)","cAb HBV","chronic HBV","Drug use","Cocaine use","Methamphetamine use","Heroin use", 
                                      "baseline viral load(>800,000 IU/ml)","peak Bilirubin(>20)","Risk factor:PWID", 
                                      "Risk factor:MSM","Genotype","Diabetes","Alcohol excess","Weight","Immunotherapy","IL28B(CC vs CT/TT)"),
-                          p_value=c(fisher_go_co,fisher_age_group_co,fisher_eth_group_co,fisher_hiv_co,wilcox_cd4_co,fisher_arvs_co,
+                          p_value=c(fisher_go_co,fisher_age_group_co,fisher_eth_group_co,fisher_hiv_co,fisher_CD4_group_co,fisher_arvs_co,
                                     fisher_peakALT_binary_co,fisher_cAb_HBV_co,"NA",fisher_all_drug_use_co,fisher_cocaine_use_co,fisher_meth_co,
                                     fisher_heroin_co,fisher_b_viral_load_binary_co,fisher_peakBil_binary_co,fisher_IDU_co,fisher_MSM_co,
                                     fisher_genotype_co,fisher_diabetic_co,fisher_alcohol_excess_co,wilcox_weight_co,fisher_immuno_co, 
