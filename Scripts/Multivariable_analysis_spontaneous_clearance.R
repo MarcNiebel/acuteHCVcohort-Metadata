@@ -32,6 +32,7 @@ data_mv$Gender <- relevel(data_mv$Gender,ref = "Male")
 data_mv$hiv <- relevel(data_mv$hiv,ref = "1")
 data_mv$MSM <- relevel(data_mv$MSM,ref = "1")
 data_mv$IL28B <- relevel(data_mv$IL28B,ref="CT/TT")
+data_mv$Group_CD4 <-relevel(data_mv$Group_CD4,ref=">=200")
 
 #Changing the column entries to be more meaningful
 data_mv <- data_mv %>% mutate(hiv=recode(hiv,"0"="Negative","1"="Positive"))
@@ -48,22 +49,10 @@ pdf(file="Output/Multivariable_sc/Forest_plot_sc_all_variables.pdf", onefile = F
 ggforest(multivariable_cox)
 dev.off()
 
-#Remove gender cause only 11 females
-multivariable_cox_remove_gender <-update(multivariable_cox,~.-Gender)
-sink("Output/Multivariable_sc/gender_removed.txt")
-print(multivariable_cox_remove_gender)
-sink(file=NULL)
-pdf(file="Output/Multivariable_sc/Forest_plot_excluded_gender.pdf",onefile = FALSE)
-ggforest(multivariable_cox_remove_gender)
-dev.off()
-
-#No difference in either model
-anova(multivariable_cox,multivariable_cox_remove_gender)
-
 #Not currently being used
 data_combine_genotype <- data_mv %>% 
     mutate(Gt1_nonGt1=case_when(Genotype=="gt1a" ~ "gt1",TRUE~"non-gt1"))
-multivariable_cox_combine <- coxph(Surv(Time,Event)~age+Gender+hiv+peak_Bil_binary+Binary_peakALT+PWID+Gt1_nonGt1,data=data_combine_genotype)
+multivariable_cox_combine <- coxph(Surv(Time,Event)~Age+Gender+hiv+peak_Bil_binary+Binary_peakALT+PWID+Gt1_nonGt1,data=data_combine_genotype)
 pdf(file="Output/Multivariable_sc/Forest_plot_combined_genotype.pdf",onefile = FALSE)
 ggforest(multivariable_cox_combine)
 dev.off()
@@ -79,7 +68,7 @@ anova(multivariable_cox_combine,multivariable_cox_combine_remove_gender)
 #IL28B(note only 111 typed), Core_HBV_Ab, heroin,methamphetamine,cocaine usage
 #Also genotype removed cause patients who are able to clear are often not typeable and different drug usage
 multivariable_cox_exploratory<- update(multivariable_cox,~.
-                                       +Core_HBV_Ab+IL28B+Cocaine_use+Meth_use+Heroin_use-Genotype-PWID)
+                                       +Core_HBV_Ab+IL28B+CocaineUse+MethamphetamineUse+HeroinUse-Genotype-PWID)
 sink("Output/Multivariable_sc/exploratory.txt")
 print(multivariable_cox_exploratory)
 sink(file=NULL)
@@ -89,7 +78,7 @@ dev.off()
 
 #HIV positive patients can inlcude CD4 count and ARVs
 hiv_positive_patients <- data_mv %>% filter(hiv=="Positive")
-multivariable_cox_hiv_pos <- coxph(Surv(Time,Event)~Age+Gender+PeakBilirubin+PeakALT+PWID+Genotype+CD4_count+ARVs,data=hiv_positive_patients)
+multivariable_cox_hiv_pos <- coxph(Surv(Time,Event)~Age+Gender+PeakBilirubin+PeakALT+PWID+Genotype+Group_CD4+ARVs,data=hiv_positive_patients)
 sink("Output/Multivariable_sc/hiv_positive.txt")
 print(multivariable_cox_hiv_pos)
 sink(file=NULL)
