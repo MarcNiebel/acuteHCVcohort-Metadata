@@ -128,5 +128,5 @@ ggsave(file="Output/Multivariable_sc/non-linearity_age.pdf",print(non_linearity_
 #Three groups 21-35,35-43,43-70
 non_linearity_CD4 <-ggcoxfunctional(Surv(Time,Event)~CD4_count+log(CD4_count)+sqrt(CD4_count),data=na.omit(data_mv))
 ggsave(file="Output/Multivariable_sc/non-linearity_CD4.pdf",print(non_linearity_CD4),onefile=FALSE)
-#Not linear either so will need to use a cut-off
+#Not linear either so will need to use a cut-off ie 200 being used
 
