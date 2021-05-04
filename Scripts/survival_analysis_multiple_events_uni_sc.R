@@ -7,6 +7,7 @@ library(dplyr)
 library(survival)
 library(survminer)
 library(Cairo)
+library(ggpubr)
 
 #Variables and time_1,time2 to event
 variable_data <- read.csv("Output/survival_df.csv")
@@ -199,11 +200,13 @@ legend_labs <- list(c("\u2264 40",">40"),c("Male","Female"),c("hiv positive","hi
 
 list_plots <- ggsurvplot_list(fit=fits,data=KM_data_primary_event,legend.title = legend_titles,legend.labs = legend_labs,
                               conf.int=TRUE,pval=TRUE,ylab="Proportion of HCV persistence",xlabs="Days")
-
+#Indivudal ones
 lapply(names(list_plots),
        function(x)ggsave(path="Output/survival analysis_uni_sc/",filename=paste(x,".pdf",sep=""),height = 5.83,width=8.27, units= "in",
                          plot=print(list_plots[[x]]),
                          device = cairo_pdf))
+
+
 
 #Only the significant KM ones####
 significant_ones <- arrange_ggsurvplots(list_plots[c(3,7,11,13)],print = FALSE,ncol = 2,nrow=2)

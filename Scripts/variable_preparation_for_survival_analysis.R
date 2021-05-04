@@ -7,8 +7,6 @@
 library(dplyr)
 library(tidyr)
 
-#NEED TO ENSURE THAT ALL ARE USING THE MOST UPTODATE REDCAP FILE
-
 #Preparing data####
 #Sourcing the dataframe from the data folder
 source("./Data/AcuteHCV_R_2021-04-22_1259.r", chdir = TRUE)
@@ -253,6 +251,7 @@ time_to_event <-read.csv("data/time_to_event_multiple_instances.csv")
 single_infection_patients <- left_join(re_infection_patients_removed,time_to_event,by="record_id")
 single_infection_patients <- single_infection_patients %>% select(-c(Reinfection))
 
+#Pulling out re_infected patients
 time_to_event_re_infected_patients <- time_to_event %>%
     filter(Reinfection =="Yes")
 
